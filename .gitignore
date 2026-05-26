@@ -1,0 +1,22 @@
+# macOS
+.DS_Store
+
+# Node / dev
+node_modules/
+npm-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build / release artifacts
+dist/
+*.zip
+
+# Logs
+*.log
