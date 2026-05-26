@@ -55,7 +55,7 @@ On `Insert`:
 2. Convert MD → HTML via `marked` (GFM enabled)
 3. Sanitize via `DOMPurify`
 4. Parse sanitized HTML into a ProseMirror slice using the editor's live schema
-5. Dispatch `view.dispatch(view.state.tr.replaceSelectionWith(slice))` against the originating editor view
+5. Dispatch `view.dispatch(view.state.tr.replaceSelection(slice))` against the originating editor view
 6. Close the dialog; focus returns to the editor
 
 If the user has text selected in the editor when the dialog opens, that selection is replaced. If the user has a collapsed cursor, the slice is inserted at the cursor.
@@ -87,7 +87,7 @@ new window.DOMParser()
 ProseMirror.DOMParser.fromSchema(view.state.schema)
   .parseSlice(domBody)                               →  ProseMirror slice
    ↓
-view.dispatch(view.state.tr.replaceSelectionWith(slice))
+view.dispatch(view.state.tr.replaceSelection(slice))
 
 Note: two distinct `DOMParser`s are used in sequence. `window.DOMParser` (browser
 standard, HTML string → DOM tree) feeds `ProseMirror.DOMParser` (from

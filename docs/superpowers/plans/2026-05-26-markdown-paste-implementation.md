@@ -462,11 +462,11 @@ export function insertHtml(view, safeHtml) {
     .fromSchema(view.state.schema)
     .parseSlice(dom);
 
-  view.dispatch(view.state.tr.replaceSelectionWith(slice.content, false));
+  view.dispatch(view.state.tr.replaceSelection(slice));
 }
 ```
 
-(`replaceSelectionWith` with `false` for the `inheritMarks` argument keeps inserted content's own marks rather than inheriting from the cursor's stored marks — safer for mixed-format inserts.)
+(`tr.replaceSelection(slice)` is the correct API for inserting a `Slice` — i.e. the open-ended fragment produced by `parseSlice`. The sibling `tr.replaceSelectionWith(node, inheritMarks)` takes a single `Node` and is for replacing the selection with one whole node, which is not what we want here.)
 
 - [ ] **Step 2: Commit**
 
