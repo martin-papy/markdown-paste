@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { canonicalType, CALLOUT_TYPES, extractFrontmatter, frontmatterToHtml } from '../scripts/obsidian.js';
+import { canonicalType, CALLOUT_TYPES, extractFrontmatter, frontmatterToHtml, stripWikiLinks } from '../scripts/obsidian.js';
 
 test('canonicalType returns canonical types unchanged (case-insensitive)', () => {
   assert.equal(canonicalType('tip'), 'tip');
@@ -86,4 +86,32 @@ test('frontmatterToHtml escapes key and value content', () => {
   const html = frontmatterToHtml([['x', '<script>alert(1)</script>']]);
   assert.doesNotMatch(html, /<script>/);
   assert.match(html, /&lt;script&gt;/);
+});
+
+test('stripWikiLinks converts a plain wikilink to its text', () => {
+  assert.equal(stripWikiLinks('see [[Montague Edwards]] now'), 'see Montague Edwards now');
+});
+
+test('stripWikiLinks uses the alias after a pipe', () => {
+  assert.equal(stripWikiLinks('[[St. Agnes|son lieu]]'), 'son lieu');
+});
+
+test('stripWikiLinks drops heading/block refs', () => {
+  assert.equal(stripWikiLinks('[[Note#Heading]]'), 'Note');
+});
+
+test('stripWikiLinks leaves Foundry command rolls alone', () => {
+  assert.equal(stripWikiLinks('roll [[/r 1d20]]'), 'roll [[/r 1d20]]');
+});
+
+test('stripWikiLinks leaves Foundry inline rolls alone', () => {
+  assert.equal(stripWikiLinks('[[1d20+5]]'), '[[1d20+5]]');
+});
+
+test('stripWikiLinks leaves embeds alone', () => {
+  assert.equal(stripWikiLinks('![[image.png]]'), '![[image.png]]');
+});
+
+test('stripWikiLinks does not touch @UUID tokens', () => {
+  assert.equal(stripWikiLinks('@UUID[Actor.x]{Bob}'), '@UUID[Actor.x]{Bob}');
 });

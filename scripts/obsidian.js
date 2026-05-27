@@ -136,3 +136,20 @@ ${rows}
   </tbody>
 </table>`;
 }
+
+/**
+ * Replace Obsidian wikilinks with plain text. Foundry rolls ([[/r …]], [[1d20]])
+ * and embeds (![[…]]) are left untouched.
+ * @param {string} md
+ * @returns {string}
+ */
+export function stripWikiLinks(md) {
+  return md.replace(/(!?)\[\[([^\]\n]+?)\]\]/g, (match, bang, inner) => {
+    if (bang) return match; // ![[embed]] — out of scope
+    const trimmed = inner.trim();
+    if (trimmed.startsWith('/')) return match; // Foundry command roll
+    if (/^\d*[dD]\d/.test(trimmed)) return match; // Foundry inline dice roll
+    if (inner.includes('|')) return inner.split('|').pop().trim();
+    return inner.split('#')[0].trim();
+  });
+}
