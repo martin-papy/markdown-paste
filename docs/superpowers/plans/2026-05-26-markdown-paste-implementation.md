@@ -56,7 +56,7 @@ All subsequent task commits happen on this branch. At the end, you PR `feature-v
   "authors": [
     {
       "name": "Martin Papy",
-      "email": "martin.papy@cbtw.tech"
+      "email": "martin.papy@gmail.com"
     }
   ],
   "compatibility": {
