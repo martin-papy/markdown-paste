@@ -1,0 +1,13 @@
+{
+  "name": "markdown-paste-tests",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Dev-only — node test runner config for markdown-paste",
+  "type": "module",
+  "scripts": {
+    "test": "node --test --import ./tests/setup.js tests/"
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.0"
+  }
+}
