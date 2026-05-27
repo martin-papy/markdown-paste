@@ -50,16 +50,16 @@ convert(md, deps, options):
   if options.obsidian !== false:
     { frontmatter, body } = extractFrontmatter(md)        // strip leading --- … --- block
     body                  = stripWikiLinks(body)          // [[A|B]]→B, [[A]]→A, rolls untouched
-    md = (frontmatter ? frontmatterToHtml(frontmatter, labels) + "\n\n" : "") + body
-    marked = withCalloutExtension(marked, labels)         // marked.use({ extensions:[…] }), idempotent
+    body = transformCallouts(body, marked, labels)        // callout blockquotes → raw-HTML blocks
+    md   = (frontmatter ? frontmatterToHtml(frontmatter, labels) + "\n\n" : "") + body
   html = marked.parse(md, { gfm:true, breaks:gfmBreaks })
   return DOMPurify.sanitize(html, { ADD_ATTR: ['target','rel'] })   // class kept by DOMPurify default
 ```
 
-- **Frontmatter** and **wikilinks** are string→string pre-processors that run before `marked`.
-- **Callouts** are a `marked` block extension. Obsidian callouts *are* blockquotes syntactically, so the extension rides marked's own lexer to render the callout body (nested bold, lists, etc. just work) rather than re-implementing inline parsing.
-  - **Registration caveat:** `marked.use({ extensions })` mutates the instance. Because `convert` is called repeatedly, registration must not stack — either register once at module load, guard with an idempotency flag, or build a dedicated `new Marked()` instance configured with the callout extension. The plan decides which; the spec only requires that repeated `convert` calls produce identical output.
-- `frontmatterToHtml` emits a raw HTML block prepended to the Markdown source; `marked` passes raw HTML blocks through untouched, then DOMPurify sanitizes the whole document once.
+- **Frontmatter**, **callouts**, and **wikilinks** are all string→string pre-processors that run before the outer `marked.parse`. Each emits either plain Markdown or a raw HTML block; `marked` passes raw HTML blocks through untouched, then DOMPurify sanitizes the whole document once.
+- **Callouts** are handled by a pre-processor (not a registered `marked` extension). Obsidian callouts *are* blockquotes syntactically, so `transformCallouts` finds the `> [!type] …` block, strips the `>` prefixes, renders the callout **body** by calling the injected `marked.parse(...)` recursively (so nested bold, lists, etc. just work), and wraps the result in the target `<blockquote class="md-callout …">`.
+  - **Why a pre-processor, not `marked.use({ extensions })`:** `marked.use` mutates the shared instance, which would stack across repeated `convert` calls and bake the first call's `labels` in permanently. The pre-processor takes `marked` and `labels` as arguments per call → no global mutation, correct localization every time, and pure/Node-testable.
+- `frontmatterToHtml` emits a raw HTML block prepended to the Markdown source by the same mechanism.
 
 ### Why this shape
 
@@ -199,7 +199,7 @@ convert(md, deps, {
 ```
 scripts/
 ├── convert.js     (CHANGED: accept options.obsidian + options.labels; orchestrate obsidian layer)
-├── obsidian.js    (NEW: extractFrontmatter, frontmatterToHtml, stripWikiLinks, calloutExtension, type map)
+├── obsidian.js    (NEW: extractFrontmatter, frontmatterToHtml, stripWikiLinks, transformCallouts, type map)
 ├── settings.js    (CHANGED: add processObsidian)
 └── dialog.js      (CHANGED: pass obsidian + labels into convert)
 styles/
