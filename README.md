@@ -1,6 +1,6 @@
 # Markdown Paste
 
-A FoundryVTT module that adds a **"Paste Markdown"** toolbar button to every rich-text editor — Journal pages, item descriptions, actor bios, scene notes, chat. Paste GitHub-Flavored Markdown into the dialog, click Insert, and you get clean HTML at the cursor.
+A FoundryVTT module that adds a **"Paste Markdown"** toolbar button to every rich-text editor — Journal pages, item descriptions, actor bios, scene notes, chat. Paste GitHub-Flavored Markdown into the dialog, click Insert, and you get clean HTML at the cursor. Supports Obsidian syntax.
 
 System-agnostic. Works on Foundry v13 and v14.
 
@@ -25,7 +25,13 @@ https://github.com/martin-papy/markdown-paste/releases/latest/download/module.js
 
 1. Open any editor with a ProseMirror toolbar (Journal page, item description, actor bio…).
 2. Click the **Markdown** icon in the toolbar.
+
+![Markdown Icon](images/Toolbar-MD-Button.png)
+
 3. Paste your Markdown into the textarea.
+
+![Markdown INsert Popup](images/Paste-MD-Popup.png)
+
 4. Click **Insert**. Converted HTML lands at the cursor.
 
 ## Settings
@@ -42,26 +48,7 @@ Found under **Configure Settings → Module Settings → Markdown Paste**:
 
 All settings are client-scope (per-user, not GM-controlled).
 
-## Smoke test checklist
-
-Used when validating a new release:
-
-- [ ] Button appears in Journal page editor
-- [ ] Button appears in Item description editor
-- [ ] Button appears in Actor bio editor
-- [ ] Button absent from chat composer (default off)
-- [ ] Dialog opens, autofocus on textarea, Insert disabled until content typed
-- [ ] Tables, task lists, strikethrough, fenced code blocks convert correctly
-- [ ] `@UUID[Actor.x]{label}` survives and enriches at view time
-- [ ] `[[/r 1d20]]` survives and is clickable at view time
-- [ ] `<script>` in pasted MD is stripped
-- [ ] Cursor-position insertion works (not appended at end)
-- [ ] Selection replacement works
-- [ ] Closing the sheet while dialog is open produces a graceful error toast
-- [ ] Pasting an Obsidian note yields a Properties table at the top
-- [ ] Callouts render with emoji + title (colored box if the class survives, plain blockquote otherwise)
-- [ ] `[[Wiki Links]]` become plain text; `[[/r 1d20]]` stays a working roll
-- [ ] "Process Obsidian syntax" off → raw `[!type]`, `---`, and `[[…]]` pass through unprocessed
+![Module Settings](images/Settings.png)
 
 ## Development
 
