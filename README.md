@@ -66,6 +66,22 @@ npm test
 
 The unit-testable conversion pipeline (`scripts/convert.js`) is covered by `tests/convert.test.js` via Node's built-in test runner + jsdom.
 
+## Updating vendored dependencies
+
+Runtime libraries (`marked`, `dompurify`) are pinned in `package.json` and the
+browser-ready ESM bundles live in `vendor/`. Those bundles are **generated** — do
+not edit them by hand.
+
+```bash
+npm install            # install pinned dependencies
+npm run vendor         # regenerate vendor/ from node_modules
+npm test               # verify conversion still behaves
+```
+
+CI fails if `vendor/` is out of sync with the pinned versions. A weekly
+`update-deps` workflow bumps the libraries to latest, regenerates `vendor/`, runs
+the tests, and opens a pull request automatically.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
