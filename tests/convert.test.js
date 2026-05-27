@@ -4,6 +4,8 @@ import { JSDOM } from 'jsdom';
 import { marked } from '../vendor/marked.esm.js';
 import DOMPurifyFactory from '../vendor/purify.es.mjs';
 import { convert } from '../scripts/convert.js';
+import { readFileSync } from 'node:fs';
+const fixture = readFileSync(new URL('./test-file-obsidian.md', import.meta.url), 'utf8');
 
 const window = new JSDOM('').window;
 const DOMPurify = DOMPurifyFactory(window);
@@ -124,4 +126,45 @@ test('gfmBreaks=true: single newlines become br', () => {
 
 test('empty input returns empty string', () => {
   assert.equal(convert('', deps), '');
+});
+
+test('convert renders Obsidian frontmatter as a Properties table by default', () => {
+  const html = convert('---\ntype: pnj\n---\n\n# Title', deps);
+  assert.match(html, /class="md-frontmatter"/);
+  assert.match(html, /<td><strong>type<\/strong><\/td><td>pnj<\/td>/);
+});
+
+test('convert renders Obsidian callouts by default', () => {
+  const html = convert('> [!tip] Hint\n> Body', deps);
+  assert.match(html, /md-callout-tip/);
+  assert.match(html, /💡 Hint/);
+});
+
+test('convert strips wikilinks but keeps Foundry rolls', () => {
+  const html = convert('See [[Bob]] then roll [[/r 1d20]]', deps);
+  assert.match(html, /See Bob then roll/);
+  assert.match(html, /\[\[\/r 1d20\]\]/);
+});
+
+test('convert with obsidian:false leaves Obsidian syntax unprocessed', () => {
+  const html = convert('> [!tip] Hint\n> Body', deps, { obsidian: false });
+  assert.doesNotMatch(html, /md-callout/);
+  assert.match(html, /\[!tip\]/);
+});
+
+test('convert injects localized labels', () => {
+  const html = convert('---\ntype: pnj\n---\n# x', deps, {
+    labels: { properties: 'Propriétés', callouts: {} },
+  });
+  assert.match(html, /Propriétés/);
+});
+
+test('convert handles the Obsidian reference fixture end-to-end', () => {
+  const html = convert(fixture, deps);
+  assert.match(html, /class="md-frontmatter"/);          // Properties table present
+  assert.match(html, /md-callout-info/);                 // first callout
+  assert.match(html, /md-callout-quote/);                // quote callouts
+  assert.match(html, /Montague Edwards/);                // wikilink reduced to text
+  assert.doesNotMatch(html, /\[\[Montague Edwards\]\]/); // brackets gone
+  assert.doesNotMatch(html, /<script/);                  // still sanitized
 });
