@@ -8,6 +8,7 @@ const SETTINGS = [
   { key: 'enableInChat',     def: false, nameKey: 'markdown-paste.settings.enableInChat.name',      hintKey: 'markdown-paste.settings.enableInChat.hint' },
   { key: 'enableElsewhere',  def: true,  nameKey: 'markdown-paste.settings.enableElsewhere.name',   hintKey: 'markdown-paste.settings.enableElsewhere.hint' },
   { key: 'gfmBreaks',        def: false, nameKey: 'markdown-paste.settings.gfmBreaks.name',         hintKey: 'markdown-paste.settings.gfmBreaks.hint' },
+  { key: 'processObsidian', def: true,  nameKey: 'markdown-paste.settings.processObsidian.name', hintKey: 'markdown-paste.settings.processObsidian.hint' },
 ];
 
 export function registerSettings() {

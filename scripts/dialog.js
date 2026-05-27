@@ -2,8 +2,21 @@
 import { convert } from './convert.js';
 import { insertHtml } from './insert.js';
 import { getSetting } from './settings.js';
+import { CALLOUT_TYPES } from './obsidian.js';
 import { marked } from '../vendor/marked.esm.js';
 import DOMPurify from '../vendor/purify.es.mjs';
+
+/** Build localized labels for the Obsidian layer from Foundry i18n. */
+function buildObsidianLabels() {
+  const callouts = {};
+  for (const t of CALLOUT_TYPES) {
+    callouts[t] = game.i18n.localize(`markdown-paste.callouts.${t}`);
+  }
+  return {
+    properties: game.i18n.localize('markdown-paste.frontmatter.title'),
+    callouts,
+  };
+}
 
 /**
  * Open the Paste Markdown dialog for a given ProseMirror view.
@@ -37,6 +50,8 @@ export async function openPasteDialog(view) {
           try {
             const safeHtml = convert(md, { marked, DOMPurify }, {
               gfmBreaks: getSetting('gfmBreaks'),
+              obsidian: getSetting('processObsidian'),
+              labels: buildObsidianLabels(),
             });
             if (!view.dom || !document.contains(view.dom)) {
               ui.notifications.warn(game.i18n.localize('markdown-paste.errors.editorClosed'));
