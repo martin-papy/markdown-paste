@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: '24'
-      - run: npm install marked@latest dompurify@latest --save
+      - run: npm install marked@latest dompurify@latest --save --save-exact
       - run: npm run vendor
       - run: npm test
       - name: Open pull request
