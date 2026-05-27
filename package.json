@@ -5,7 +5,12 @@
   "description": "Dev-only — node test runner config for markdown-paste",
   "type": "module",
   "scripts": {
-    "test": "node --test --import ./tests/setup.js 'tests/**/*.test.js'"
+    "test": "node --test --import ./tests/setup.js 'tests/**/*.test.js'",
+    "vendor": "node tools/vendor.mjs"
+  },
+  "dependencies": {
+    "marked": "^18.0.4",
+    "dompurify": "^3.4.6"
   },
   "devDependencies": {
     "jsdom": "^25.0.0"
