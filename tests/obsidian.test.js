@@ -80,6 +80,16 @@ test('extractFrontmatter preserves a malformed line as a raw scalar (never dropp
   assert.deepEqual(r.frontmatter, [['type', 'pnj'], ['', 'orphan line']]);
 });
 
+test('extractFrontmatter handles CRLF line endings', () => {
+  const r = extractFrontmatter('---\r\ntype: pnj\r\nname: Bob\r\n---\r\nBody');
+  assert.deepEqual(r.frontmatter, [['type', 'pnj'], ['name', 'Bob']]);
+});
+
+test('extractFrontmatter preserves nested-map lines as a raw scalar', () => {
+  const r = extractFrontmatter('---\nstats:\n  str: 10\n  con: 12\n---\nx');
+  assert.deepEqual(r.frontmatter, [['stats', 'str: 10, con: 12']]);
+});
+
 test('frontmatterToHtml renders a titled key/value table', () => {
   const html = frontmatterToHtml([['type', 'pnj'], ['tags', 'a, b']]);
   assert.match(html, /<p class="md-frontmatter-title"><strong>Properties<\/strong><\/p>/);
@@ -127,6 +137,10 @@ test('stripWikiLinks does not touch @UUID tokens', () => {
   assert.equal(stripWikiLinks('@UUID[Actor.x]{Bob}'), '@UUID[Actor.x]{Bob}');
 });
 
+test('stripWikiLinks falls back to the page name when the alias is empty', () => {
+  assert.equal(stripWikiLinks('[[Note|]]'), 'Note');
+});
+
 test('transformCallouts wraps a callout in a classed blockquote with emoji + title', () => {
   const out = transformCallouts('> [!tip] Heads up\n> Body text', marked);
   assert.match(out, /<blockquote class="md-callout md-callout-tip">/);
@@ -169,4 +183,12 @@ test('transformCallouts leaves ordinary blockquotes alone', () => {
 test('transformCallouts uses injected callout labels', () => {
   const out = transformCallouts('> [!note]', marked, { callouts: { note: 'Remarque' } });
   assert.match(out, /📝 Remarque/);
+});
+
+test('transformCallouts keeps adjacent callouts separate without a blank line', () => {
+  const out = transformCallouts('> [!note] First\n> body\n> [!tip] Second\n> body2', marked);
+  const blocks = out.match(/<blockquote class="md-callout/g) || [];
+  assert.equal(blocks.length, 2);
+  assert.match(out, /md-callout-note/);
+  assert.match(out, /md-callout-tip/);
 });

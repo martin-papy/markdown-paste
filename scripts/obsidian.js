@@ -44,13 +44,13 @@ function escapeHtml(s) {
  */
 export function canonicalType(raw) {
   const t = String(raw).toLowerCase();
-  if (CALLOUT_EMOJI[t]) return t;
-  if (CALLOUT_ALIAS[t]) return CALLOUT_ALIAS[t];
+  if (t in CALLOUT_EMOJI) return t;
+  if (t in CALLOUT_ALIAS) return CALLOUT_ALIAS[t];
   return null;
 }
 
 function unquote(s) {
-  if (s.length >= 2 && ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'")))) {
+  if (s.length >= 2 && s[0] === s[s.length - 1] && (s[0] === '"' || s[0] === "'")) {
     return s.slice(1, -1);
   }
   return s;
@@ -104,7 +104,7 @@ function parseYamlSubset(lines) {
  * @returns {{ frontmatter: Array<[string,string]>|null, body: string }}
  */
 export function extractFrontmatter(md) {
-  const lines = md.split('\n');
+  const lines = md.replace(/\r\n/g, '\n').split('\n');
   if (lines[0].trim() !== '---') return { frontmatter: null, body: md };
 
   let end = -1;
@@ -149,7 +149,11 @@ export function stripWikiLinks(md) {
     const trimmed = inner.trim();
     if (trimmed.startsWith('/')) return match; // Foundry command roll
     if (/^\d*[dD]\d/.test(trimmed)) return match; // Foundry inline dice roll
-    if (inner.includes('|')) return inner.split('|').pop().trim();
+    if (inner.includes('|')) {
+      const parts = inner.split('|');
+      const alias = parts[parts.length - 1].trim();
+      return alias || parts[0].split('#')[0].trim();
+    }
     return inner.split('#')[0].trim();
   });
 }
@@ -181,7 +185,7 @@ function renderCallout(block, head, marked, labels) {
  * @returns {string}
  */
 export function transformCallouts(md, marked, labels = {}) {
-  const lines = md.split('\n');
+  const lines = md.replace(/\r\n/g, '\n').split('\n');
   const out = [];
   const head = /^>\s*\[!(\w+)\]([+-]?)\s*(.*)$/;
   let i = 0;
@@ -190,7 +194,7 @@ export function transformCallouts(md, marked, labels = {}) {
     if (!m) { out.push(lines[i]); i++; continue; }
     const block = [lines[i]];
     i++;
-    while (i < lines.length && /^>/.test(lines[i])) { block.push(lines[i]); i++; }
+    while (i < lines.length && /^>/.test(lines[i]) && !head.test(lines[i])) { block.push(lines[i]); i++; }
     out.push(renderCallout(block, m, marked, labels));
   }
   return out.join('\n');
