@@ -60,7 +60,7 @@ test('ordered lists render as ol/li', () => {
 
 test('GFM task lists render with checkboxes', () => {
   const html = convert('- [ ] todo\n- [x] done', deps);
-  // marked v15 emits disabled="" before type="checkbox"; match both attributes regardless of order
+  // marked emits the disabled and type="checkbox" attributes in varying order across versions; match both regardless of order
   assert.match(html, /<input[^>]*type="checkbox"[^>]*/);
   assert.match(html, /<input[^>]*disabled[^>]*/);
   assert.match(html, /<input[^>]*checked[^>]*>/);
@@ -92,7 +92,7 @@ test('script tags are stripped', () => {
 });
 
 test('onerror attributes are stripped', () => {
-  // marked v15 rejects the malformed image URL; use raw inline HTML to produce an <img onerror=...>
+  // marked rejects the malformed image URL; use raw inline HTML to produce an <img onerror=...>
   const html = convert('<img src="https://e.com/x.png" onerror="alert(1)">', deps);
   assert.doesNotMatch(html, /onerror=/i);
 });

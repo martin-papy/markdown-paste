@@ -1,3 +1,4 @@
+// GENERATED from dompurify@3.4.6 — do not edit by hand. Run `npm run vendor` to regenerate.
 /*! @license DOMPurify 3.4.6 | (c) Cure53 and other contributors | Released under the Apache license 2.0 and Mozilla Public License 2.0 | github.com/cure53/DOMPurify/blob/3.4.6/LICENSE */
 
 function _arrayLikeToArray(r, a) {
@@ -1737,4 +1738,3 @@ function createDOMPurify() {
 var purify = createDOMPurify();
 
 export { purify as default };
-//# sourceMappingURL=purify.es.mjs.map
