@@ -117,3 +117,22 @@ export function extractFrontmatter(md) {
   const body = lines.slice(end + 1).join('\n').replace(/^\n+/, '');
   return { frontmatter: entries.length ? entries : null, body };
 }
+
+/**
+ * Render frontmatter entries as a raw-HTML "Properties" table block.
+ * @param {Array<[string,string]>} entries
+ * @param {{ properties?: string }} [labels]
+ * @returns {string}
+ */
+export function frontmatterToHtml(entries, labels = {}) {
+  const title = labels.properties || DEFAULT_LABELS.properties;
+  const rows = entries
+    .map(([k, v]) => `    <tr><td><strong>${escapeHtml(k)}</strong></td><td>${escapeHtml(v)}</td></tr>`)
+    .join('\n');
+  return `<p class="md-frontmatter-title"><strong>${escapeHtml(title)}</strong></p>
+<table class="md-frontmatter">
+  <tbody>
+${rows}
+  </tbody>
+</table>`;
+}

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { canonicalType, CALLOUT_TYPES, extractFrontmatter } from '../scripts/obsidian.js';
+import { canonicalType, CALLOUT_TYPES, extractFrontmatter, frontmatterToHtml } from '../scripts/obsidian.js';
 
 test('canonicalType returns canonical types unchanged (case-insensitive)', () => {
   assert.equal(canonicalType('tip'), 'tip');
@@ -67,4 +67,23 @@ test('extractFrontmatter returns the input unchanged when the fence never closes
   const r = extractFrontmatter(md);
   assert.equal(r.frontmatter, null);
   assert.equal(r.body, md);
+});
+
+test('frontmatterToHtml renders a titled key/value table', () => {
+  const html = frontmatterToHtml([['type', 'pnj'], ['tags', 'a, b']]);
+  assert.match(html, /<p class="md-frontmatter-title"><strong>Properties<\/strong><\/p>/);
+  assert.match(html, /<table class="md-frontmatter">/);
+  assert.match(html, /<tr><td><strong>type<\/strong><\/td><td>pnj<\/td><\/tr>/);
+  assert.match(html, /<tr><td><strong>tags<\/strong><\/td><td>a, b<\/td><\/tr>/);
+});
+
+test('frontmatterToHtml uses the injected title label', () => {
+  const html = frontmatterToHtml([['type', 'pnj']], { properties: 'Propriétés' });
+  assert.match(html, /<strong>Propriétés<\/strong>/);
+});
+
+test('frontmatterToHtml escapes key and value content', () => {
+  const html = frontmatterToHtml([['x', '<script>alert(1)</script>']]);
+  assert.doesNotMatch(html, /<script>/);
+  assert.match(html, /&lt;script&gt;/);
 });
