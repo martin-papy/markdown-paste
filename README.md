@@ -4,9 +4,12 @@ A FoundryVTT module that adds a **"Paste Markdown"** toolbar button to every ric
 
 System-agnostic. Works on Foundry v13 and v14.
 
+## Have an idea or a feedback ?
+If there's a workflow that annoys you, a small thing that could be smoother, or a feature you keep wishing existed — feel free to reach out on GitHub and describe it. A short note is plenty.
+
 ## Features
 
-- Toolbar button in every ProseMirror editor (toggleable per surface)
+- Toolbar button in every ProseMirror editor (toggleable per surface), except for the chat box as there's not enough space.
 - GFM support: tables, task lists, strikethrough, fenced code, autolinks
 - Obsidian support: frontmatter → Properties table, callouts → styled blockquotes, wikilinks → plain text
 - Foundry enricher tokens pass through (`@UUID[Actor.x]{Bob}`, `[[/r 1d20]]`, etc.)
