@@ -81,7 +81,7 @@ function parseYamlSubset(lines) {
 
     flush();
     const kv = line.match(/^([\w.\-]+):\s*(.*)$/);
-    if (!kv) continue; // malformed top-level line — skipped
+    if (!kv) { entries.push(['', line.trim()]); continue; } // malformed top-level line — preserved as raw scalar
     const key = kv[1];
     const rest = kv[2].trim();
     if (rest === '') {

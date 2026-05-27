@@ -70,6 +70,16 @@ test('extractFrontmatter returns the input unchanged when the fence never closes
   assert.equal(r.body, md);
 });
 
+test('extractFrontmatter keeps an empty value as an empty string', () => {
+  const r = extractFrontmatter('---\nnote:\n---\nx');
+  assert.deepEqual(r.frontmatter, [['note', '']]);
+});
+
+test('extractFrontmatter preserves a malformed line as a raw scalar (never dropped)', () => {
+  const r = extractFrontmatter('---\ntype: pnj\norphan line\n---\nx');
+  assert.deepEqual(r.frontmatter, [['type', 'pnj'], ['', 'orphan line']]);
+});
+
 test('frontmatterToHtml renders a titled key/value table', () => {
   const html = frontmatterToHtml([['type', 'pnj'], ['tags', 'a, b']]);
   assert.match(html, /<p class="md-frontmatter-title"><strong>Properties<\/strong><\/p>/);
