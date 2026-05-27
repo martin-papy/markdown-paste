@@ -147,16 +147,19 @@ test('convert strips wikilinks but keeps Foundry rolls', () => {
 });
 
 test('convert with obsidian:false leaves Obsidian syntax unprocessed', () => {
-  const html = convert('> [!tip] Hint\n> Body', deps, { obsidian: false });
-  assert.doesNotMatch(html, /md-callout/);
-  assert.match(html, /\[!tip\]/);
+  const html = convert('---\ntype: pnj\n---\n> [!tip] Hint\n\n[[Page]]', deps, { obsidian: false });
+  assert.doesNotMatch(html, /md-callout/);      // callouts off
+  assert.doesNotMatch(html, /md-frontmatter/);  // frontmatter off
+  assert.match(html, /\[!tip\]/);               // callout syntax raw
+  assert.match(html, /\[\[Page\]\]/);           // wikilinks raw
 });
 
 test('convert injects localized labels', () => {
-  const html = convert('---\ntype: pnj\n---\n# x', deps, {
-    labels: { properties: 'Propriétés', callouts: {} },
+  const html = convert('---\ntype: pnj\n---\n> [!note]\n> body', deps, {
+    labels: { properties: 'Propriétés', callouts: { note: 'Remarque' } },
   });
   assert.match(html, /Propriétés/);
+  assert.match(html, /📝 Remarque/);
 });
 
 test('convert handles the Obsidian reference fixture end-to-end', () => {
