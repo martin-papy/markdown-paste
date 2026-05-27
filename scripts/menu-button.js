@@ -9,26 +9,24 @@ import { getSetting } from './settings.js';
  * @param {EditorView} view
  * @returns {string} The settings key that gates this surface.
  */
-function resolveSurfaceSetting(view) {
+export function resolveSurfaceSetting(view) {
   const dom = view.dom;
   if (!dom) return 'enableElsewhere';
 
-  // Chat composer detection — the chat form contains the ProseMirror editor
-  // for chat messages on both v13 and v14.
-  if (dom.closest('#chat-form, #chat-message, .chat-form')) {
-    return 'enableInChat';
-  }
-
-  // Walk up to the application element. ApplicationV2 marks itself with
-  // [data-application-id]; legacy Application uses .window-app / [data-appid].
-  const appEl = dom.closest('[data-application-id], [data-appid], .application');
+  // Walk up to the host application element. ApplicationV2 (Journal/Item/Actor
+  // sheets on v13/v14) renders its root with the `application` class; legacy V1
+  // Application uses a numeric data-appid.
+  const appEl = dom.closest('[data-appid], .application');
   if (!appEl) return 'enableElsewhere';
 
-  // Try to resolve the host document type via the application instance.
-  const appId = appEl.dataset.applicationId || appEl.dataset.appid;
-  const app = appId
-    ? (foundry.applications.instances?.get(appId) ?? ui.windows?.[appId])
-    : null;
+  // Resolve the host application instance. ApplicationV2 exposes its registry
+  // id via the element's `id` attribute (Application#id) and is tracked in
+  // foundry.applications.instances — NOT via a data-application-id dataset
+  // attribute. Legacy V1 apps use the numeric data-appid keyed into ui.windows.
+  const app =
+    (appEl.id ? foundry.applications?.instances?.get(appEl.id) : null) ??
+    (appEl.dataset.appid ? ui.windows?.[appEl.dataset.appid] : null) ??
+    null;
 
   const docName = app?.document?.documentName ?? app?.object?.documentName ?? null;
 

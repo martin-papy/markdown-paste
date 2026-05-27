@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-05-27
+
+### Removed
+- **Show in chat composer** setting (`enableInChat`) and chat-surface detection. The button rendered correctly but overflowed Foundry's narrow, non-wrapping chat toolbar and could not be reliably shown; the feature was niche and is dropped rather than worked around. (#4)
+
 ## [0.1.0] - 2026-05-26
 
 ### Added

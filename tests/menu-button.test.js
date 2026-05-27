@@ -7,7 +7,7 @@ const captured = {};
 globalThis.Hooks = { on: (event, fn) => { captured[event] = fn; } };
 globalThis.game = { settings: { get: () => true } }; // every surface enabled
 
-const { registerMenuHook } = await import('../scripts/menu-button.js');
+const { registerMenuHook, resolveSurfaceSetting } = await import('../scripts/menu-button.js');
 
 // Mirror of foundry.prosemirror.ProseMirrorMenu._MENU_ITEM_SCOPES
 // (common/prosemirror/menu.mjs). The render loop only draws a button when
@@ -16,7 +16,7 @@ const SCOPES = { BOTH: '', TEXT: 'text', HTML: 'html' };
 
 function makeMenu() {
   return {
-    // No chat form and no application ancestor → resolves to 'enableElsewhere'.
+    // No application ancestor → resolves to 'enableElsewhere'.
     view: { dom: { closest: () => null } },
     constructor: { _MENU_ITEM_SCOPES: SCOPES },
   };
@@ -55,4 +55,63 @@ test('button is omitted when its surface setting is disabled', () => {
   } finally {
     globalThis.game.settings.get = prev;
   }
+});
+
+// --- resolveSurfaceSetting: per-surface mapping (regression for issue #3) ---
+//
+// A fake ProseMirror view whose DOM resolves to a chosen host element.
+// resolveSurfaceSetting calls view.dom.closest() once, with the application
+// selector, so the helper just returns the chosen host element.
+function viewFor(appEl) {
+  return { dom: { closest: () => appEl } };
+}
+
+// Stub the two registries resolveSurfaceSetting consults, then resolve.
+// ApplicationV2 instances live in foundry.applications.instances keyed by the
+// element id; legacy V1 windows live in ui.windows keyed by the numeric appid.
+function resolveWith({ appEl, instances = new Map(), windows = {} }) {
+  const prevFoundry = globalThis.foundry;
+  const prevUi = globalThis.ui;
+  globalThis.foundry = { applications: { instances } };
+  globalThis.ui = { windows };
+  try {
+    return resolveSurfaceSetting(viewFor(appEl));
+  } finally {
+    globalThis.foundry = prevFoundry;
+    globalThis.ui = prevUi;
+  }
+}
+
+test('ApplicationV2 Journal page surface maps to enableInJournals', () => {
+  const appEl = { id: 'JournalEntryPageProseMirrorSheet-abc', dataset: {} };
+  const instances = new Map([[appEl.id, { document: { documentName: 'JournalEntryPage' } }]]);
+  assert.equal(resolveWith({ appEl, instances }), 'enableInJournals');
+});
+
+test('ApplicationV2 Item sheet surface maps to enableInItems', () => {
+  const appEl = { id: 'ItemSheetV2-xyz', dataset: {} };
+  const instances = new Map([[appEl.id, { document: { documentName: 'Item' } }]]);
+  assert.equal(resolveWith({ appEl, instances }), 'enableInItems');
+});
+
+test('ApplicationV2 Actor sheet surface maps to enableInActors', () => {
+  const appEl = { id: 'ActorSheetV2-123', dataset: {} };
+  const instances = new Map([[appEl.id, { document: { documentName: 'Actor' } }]]);
+  assert.equal(resolveWith({ appEl, instances }), 'enableInActors');
+});
+
+test('legacy V1 sheet resolves via data-appid + ui.windows (regression guard)', () => {
+  const appEl = { id: 'actor-XYZ', dataset: { appid: '42' } };
+  const windows = { 42: { object: { documentName: 'Actor' } } };
+  assert.equal(resolveWith({ appEl, windows }), 'enableInActors');
+});
+
+test('surface with no host application maps to enableElsewhere', () => {
+  assert.equal(resolveWith({ appEl: null }), 'enableElsewhere');
+});
+
+test('host application with an unrecognised document maps to enableElsewhere', () => {
+  const appEl = { id: 'Settings-app', dataset: {} };
+  const instances = new Map([[appEl.id, { document: { documentName: 'Setting' } }]]);
+  assert.equal(resolveWith({ appEl, instances }), 'enableElsewhere');
 });
