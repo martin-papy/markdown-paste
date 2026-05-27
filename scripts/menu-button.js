@@ -50,6 +50,12 @@ export function registerMenuHook() {
       action: 'markdown-paste',
       title: 'markdown-paste.button.title',
       icon: '<i class="fa-brands fa-markdown"></i>',
+      // ProseMirrorMenu#render only draws items whose `scope` matches the active
+      // editing surface (_MENU_ITEM_SCOPES: BOTH="" / TEXT="text" / HTML="html").
+      // Without a scope the item is silently dropped. 'text' shows the button in
+      // the rich-text editor, not the raw HTML source view (where PM insertion
+      // wouldn't apply anyway).
+      scope: 'text',
       group: 5,
       priority: 50,
       cmd: () => {
