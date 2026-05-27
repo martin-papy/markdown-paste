@@ -18,3 +18,72 @@
 .prosemirror.menu button[data-action="markdown-paste"] i.fa-markdown {
   font-size: 1.05em;
 }
+
+/* ── Obsidian frontmatter "Properties" table ───────────────────────────── */
+.md-frontmatter-title {
+  margin: 0 0 0.25em;
+  font-size: var(--font-size-12, 12px);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.7;
+}
+.md-frontmatter {
+  border-collapse: collapse;
+  margin: 0 0 1em;
+}
+.md-frontmatter td {
+  border: none;
+  padding: 0.2em 1em 0.2em 0;
+  vertical-align: top;
+}
+.md-frontmatter td:first-child {
+  white-space: nowrap;
+  opacity: 0.85;
+}
+
+/* ── Obsidian callouts ─────────────────────────────────────────────────── */
+:root {
+  --md-callout-note: #448aff;
+  --md-callout-abstract: #00b8d4;
+  --md-callout-info: #448aff;
+  --md-callout-todo: #448aff;
+  --md-callout-tip: #00bfa5;
+  --md-callout-success: #00c853;
+  --md-callout-question: #f2c037;
+  --md-callout-warning: #ff9800;
+  --md-callout-failure: #ff5252;
+  --md-callout-danger: #ff1744;
+  --md-callout-bug: #f50057;
+  --md-callout-example: #7c4dff;
+  --md-callout-quote: #9e9e9e;
+}
+
+.md-callout {
+  --md-callout-color: var(--md-callout-quote);
+  border-left: 4px solid var(--md-callout-color);
+  border-radius: 4px;
+  padding: 0.5em 0.75em;
+  margin: 0.75em 0;
+  background: color-mix(in srgb, var(--md-callout-color) 8%, transparent);
+}
+.md-callout .md-callout-title {
+  margin: 0 0 0.25em;
+  color: var(--md-callout-color);
+}
+.md-callout .md-callout-title + * {
+  margin-top: 0;
+}
+
+.md-callout-note    { --md-callout-color: var(--md-callout-note); }
+.md-callout-abstract{ --md-callout-color: var(--md-callout-abstract); }
+.md-callout-info    { --md-callout-color: var(--md-callout-info); }
+.md-callout-todo    { --md-callout-color: var(--md-callout-todo); }
+.md-callout-tip     { --md-callout-color: var(--md-callout-tip); }
+.md-callout-success { --md-callout-color: var(--md-callout-success); }
+.md-callout-question{ --md-callout-color: var(--md-callout-question); }
+.md-callout-warning { --md-callout-color: var(--md-callout-warning); }
+.md-callout-failure { --md-callout-color: var(--md-callout-failure); }
+.md-callout-danger  { --md-callout-color: var(--md-callout-danger); }
+.md-callout-bug     { --md-callout-color: var(--md-callout-bug); }
+.md-callout-example { --md-callout-color: var(--md-callout-example); }
+.md-callout-quote   { --md-callout-color: var(--md-callout-quote); }
