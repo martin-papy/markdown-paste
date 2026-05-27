@@ -1,0 +1,207 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Parse module.json and tag
+        id: parse
+        run: |
+          set -euo pipefail
+
+          TAG="${GITHUB_REF_NAME}"
+          VERSION_FROM_TAG="${TAG#v}"
+
+          MODULE_ID=$(jq -r '.id'                          module.json)
+          MODULE_VERSION=$(jq -r '.version'                module.json)
+          MODULE_DOWNLOAD=$(jq -r '.download'              module.json)
+          COMPAT_MIN=$(jq -r '.compatibility.minimum'      module.json)
+          COMPAT_VERIFIED=$(jq -r '.compatibility.verified' module.json)
+          COMPAT_MAX=$(jq -r '.compatibility.maximum // ""' module.json)
+
+          IS_STABLE=false
+          if [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            IS_STABLE=true
+          fi
+
+          {
+            echo "TAG=$TAG"
+            echo "VERSION_FROM_TAG=$VERSION_FROM_TAG"
+            echo "MODULE_ID=$MODULE_ID"
+            echo "MODULE_VERSION=$MODULE_VERSION"
+            echo "MODULE_DOWNLOAD=$MODULE_DOWNLOAD"
+            echo "COMPAT_MIN=$COMPAT_MIN"
+            echo "COMPAT_VERIFIED=$COMPAT_VERIFIED"
+            echo "COMPAT_MAX=$COMPAT_MAX"
+            echo "IS_STABLE=$IS_STABLE"
+          } >> "$GITHUB_ENV"
+
+          echo "Parsed: tag=$TAG version=$MODULE_VERSION id=$MODULE_ID stable=$IS_STABLE"
+
+      - name: Preflight assertions
+        run: |
+          set -euo pipefail
+
+          fail() { echo "::error::$1"; exit 1; }
+
+          # 1. Tag format
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.]+)?$ ]]; then
+            fail "Tag '$TAG' does not match vX.Y.Z[-suffix]"
+          fi
+
+          # 2. Tag version matches module.json
+          if [[ "$VERSION_FROM_TAG" != "$MODULE_VERSION" ]]; then
+            fail "Tag version '$VERSION_FROM_TAG' does not match module.json .version '$MODULE_VERSION'"
+          fi
+
+          # 3. download URL points at this tag's zip
+          EXPECTED_DOWNLOAD="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/markdown-paste.zip"
+          if [[ "$MODULE_DOWNLOAD" != "$EXPECTED_DOWNLOAD" ]]; then
+            fail "module.json .download is '$MODULE_DOWNLOAD' but expected '$EXPECTED_DOWNLOAD'"
+          fi
+
+          # 4. Required Foundry fields are non-empty
+          [[ -n "$MODULE_ID"        ]] || fail "module.json .id is empty"
+          [[ -n "$COMPAT_MIN"       ]] || fail "module.json .compatibility.minimum is empty"
+          [[ -n "$COMPAT_VERIFIED"  ]] || fail "module.json .compatibility.verified is empty"
+
+          echo "Preflight OK: id=$MODULE_ID version=$MODULE_VERSION download=$MODULE_DOWNLOAD"
+
+      - name: Build release zip
+        run: |
+          set -euo pipefail
+          zip -r markdown-paste.zip module.json scripts/ styles/ lang/ vendor/
+          echo "Zip contents:"
+          unzip -l markdown-paste.zip
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          PRERELEASE_FLAG="--prerelease"
+          if [[ "$IS_STABLE" == "true" ]]; then
+            PRERELEASE_FLAG="--latest"
+          fi
+
+          gh release create "$TAG" \
+            markdown-paste.zip module.json \
+            --title "$TAG" \
+            --generate-notes \
+            $PRERELEASE_FLAG
+
+          echo "GitHub release created: https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG}"
+
+      - name: Foundry publish (stable only)
+        if: ${{ !contains(github.ref_name, '-') }}
+        env:
+          FOUNDRY_RELEASE_TOKEN: ${{ secrets.FOUNDRY_RELEASE_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${FOUNDRY_RELEASE_TOKEN:-}" ]]; then
+            echo "::error::FOUNDRY_RELEASE_TOKEN secret is not set"
+            exit 1
+          fi
+
+          MANIFEST_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/module.json"
+          NOTES_URL="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG}"
+
+          # 1. Reachability: up to 3 attempts with 5s backoff
+          for attempt in 1 2 3; do
+            if curl -fsSL --head -o /dev/null "$MANIFEST_URL"; then
+              echo "Manifest reachable on attempt $attempt: $MANIFEST_URL"
+              break
+            fi
+            if [[ $attempt -eq 3 ]]; then
+              echo "::error::Manifest URL not reachable after 3 attempts: $MANIFEST_URL"
+              exit 1
+            fi
+            echo "Manifest not reachable yet, retrying in 5s..."
+            sleep 5
+          done
+
+          # 2. Build payload.json
+          jq -n \
+            --arg id        "$MODULE_ID" \
+            --arg version   "$MODULE_VERSION" \
+            --arg manifest  "$MANIFEST_URL" \
+            --arg notes     "$NOTES_URL" \
+            --arg minimum   "$COMPAT_MIN" \
+            --arg verified  "$COMPAT_VERIFIED" \
+            --arg maximum   "$COMPAT_MAX" \
+            '{
+              id: $id,
+              "dry-run": true,
+              release: ({
+                version: $version,
+                manifest: $manifest,
+                notes: $notes,
+                compatibility: ({
+                  minimum: $minimum,
+                  verified: $verified
+                } + (if $maximum == "" then {} else {maximum: $maximum} end))
+              })
+            }' > payload.json
+
+          echo "Dry-run payload:"
+          cat payload.json
+
+          # 3. Dry-run POST
+          DRY_RESPONSE=$(curl -sS -X POST https://foundryvtt.com/_api/packages/release_version/ \
+            -H "Authorization: $FOUNDRY_RELEASE_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d @payload.json)
+
+          echo "Dry-run response: $DRY_RESPONSE"
+          if [[ "$(echo "$DRY_RESPONSE" | jq -r '.status')" != "success" ]]; then
+            echo "::error::Foundry dry-run failed: $DRY_RESPONSE"
+            exit 1
+          fi
+
+          # 4. Real POST (strip dry-run field)
+          jq 'del(."dry-run")' payload.json > payload-real.json
+
+          REAL_RESPONSE=$(curl -sS -X POST https://foundryvtt.com/_api/packages/release_version/ \
+            -H "Authorization: $FOUNDRY_RELEASE_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d @payload-real.json)
+
+          echo "Real submit response: $REAL_RESPONSE"
+          if [[ "$(echo "$REAL_RESPONSE" | jq -r '.status')" != "success" ]]; then
+            echo "::error::Foundry real submit failed: $REAL_RESPONSE"
+            exit 1
+          fi
+
+          FOUNDRY_PAGE=$(echo "$REAL_RESPONSE" | jq -r '.page')
+          echo "FOUNDRY_PAGE=$FOUNDRY_PAGE" >> "$GITHUB_ENV"
+          echo "Foundry publish succeeded: $FOUNDRY_PAGE"
+
+      - name: Job summary
+        if: always()
+        run: |
+          set -euo pipefail
+          {
+            echo "## Release ${TAG}"
+            echo ""
+            echo "- GitHub release: https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG}"
+            if [[ "${IS_STABLE:-false}" == "true" ]]; then
+              echo "- Foundry publish: ${FOUNDRY_PAGE:-N/A}"
+              echo "- Manifest: https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/module.json"
+              echo "- Compatibility: min ${COMPAT_MIN:-?} / verified ${COMPAT_VERIFIED:-?}"
+            else
+              echo "- Foundry publish: skipped (pre-release tag)"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

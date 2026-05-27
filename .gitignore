@@ -20,3 +20,8 @@ dist/
 
 # Logs
 *.log
+
+.claude/settings.local.json
+.worktrees/
+.superpowers/
+temp/
