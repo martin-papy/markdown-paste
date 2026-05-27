@@ -20,8 +20,8 @@ jobs:
       - run: npm install marked@latest dompurify@latest --save --save-exact
       - run: npm run vendor
       - run: npm test
-      - name: Open pull request
-        uses: peter-evans/create-pull-request@v7
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v8
         with:
           branch: chore/update-deps
           delete-branch: true
