@@ -1,0 +1,20 @@
+/* styles/markdown-paste.css */
+.markdown-paste-dialog textarea[name="md"] {
+  width: 100%;
+  min-height: 320px;
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: var(--font-size-13, 13px);
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.markdown-paste-dialog .hint {
+  margin-top: 0.5em;
+  font-size: var(--font-size-12, 12px);
+  opacity: 0.75;
+}
+
+/* Make the FA Markdown icon align nicely in the ProseMirror menu. */
+.prosemirror.menu button[data-action="markdown-paste"] i.fa-markdown {
+  font-size: 1.05em;
+}
