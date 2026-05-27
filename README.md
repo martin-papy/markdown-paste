@@ -1,6 +1,6 @@
 # Markdown Paste
 
-A FoundryVTT module that adds a **"Paste Markdown"** toolbar button to every rich-text editor — Journal pages, item descriptions, actor bios, scene notes, chat. Paste GitHub-Flavored Markdown into the dialog, click Insert, and you get clean HTML at the cursor. Supports Obsidian syntax.
+A FoundryVTT module that adds a **"Paste Markdown"** toolbar button to every rich-text editor — Journal pages, item descriptions, actor bios, scene notes. Paste GitHub-Flavored Markdown into the dialog, click Insert, and you get clean HTML at the cursor. Supports Obsidian syntax.
 
 System-agnostic. Works on Foundry v13 and v14.
 
@@ -41,7 +41,6 @@ Found under **Configure Settings → Module Settings → Markdown Paste**:
 - **Show in Journal Entry editors** (default: on)
 - **Show in Item sheet editors** (default: on)
 - **Show in Actor sheet editors** (default: on)
-- **Show in chat composer** (default: off)
 - **Show in other editors** (default: on)
 - **Treat single newlines as line breaks** (default: off — standard CommonMark)
 - **Process Obsidian syntax** (default: on)

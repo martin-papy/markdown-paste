@@ -25,8 +25,8 @@ The data flow is: **Toolbar hook → Dialog → Convert → Insert**
 
 ```
 scripts/main.js          Foundry init hook — calls registerSettings() + registerMenuHook()
-scripts/settings.js      MODULE_ID constant + 7 client-scoped boolean settings
-scripts/menu-button.js   getProseMirrorMenuItems hook — detects surface (Journal/Item/Actor/chat),
+scripts/settings.js      MODULE_ID constant + 6 client-scoped boolean settings
+scripts/menu-button.js   getProseMirrorMenuItems hook — detects surface (Journal/Item/Actor),
                          gates on setting, adds the toolbar button
 scripts/dialog.js        DialogV2.wait() — builds textarea UI, reads settings, calls convert(),
                          checks view.dom is still in the document, then calls insertHtml()

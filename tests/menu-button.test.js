@@ -16,7 +16,7 @@ const SCOPES = { BOTH: '', TEXT: 'text', HTML: 'html' };
 
 function makeMenu() {
   return {
-    // No chat form and no application ancestor → resolves to 'enableElsewhere'.
+    // No application ancestor → resolves to 'enableElsewhere'.
     view: { dom: { closest: () => null } },
     constructor: { _MENU_ITEM_SCOPES: SCOPES },
   };
@@ -60,28 +60,22 @@ test('button is omitted when its surface setting is disabled', () => {
 // --- resolveSurfaceSetting: per-surface mapping (regression for issue #3) ---
 //
 // A fake ProseMirror view whose DOM resolves to a chosen host element.
-// resolveSurfaceSetting calls view.dom.closest() twice: once with the chat
-// selector, once with the application selector. We branch on the selector text
-// so the helper stays independent of the exact application selector string.
-function viewFor(appEl, { chat = false } = {}) {
-  return {
-    dom: {
-      closest: (selector) =>
-        selector.includes('chat') ? (chat ? {} : null) : appEl,
-    },
-  };
+// resolveSurfaceSetting calls view.dom.closest() once, with the application
+// selector, so the helper just returns the chosen host element.
+function viewFor(appEl) {
+  return { dom: { closest: () => appEl } };
 }
 
 // Stub the two registries resolveSurfaceSetting consults, then resolve.
 // ApplicationV2 instances live in foundry.applications.instances keyed by the
 // element id; legacy V1 windows live in ui.windows keyed by the numeric appid.
-function resolveWith({ appEl, chat = false, instances = new Map(), windows = {} }) {
+function resolveWith({ appEl, instances = new Map(), windows = {} }) {
   const prevFoundry = globalThis.foundry;
   const prevUi = globalThis.ui;
   globalThis.foundry = { applications: { instances } };
   globalThis.ui = { windows };
   try {
-    return resolveSurfaceSetting(viewFor(appEl, { chat }));
+    return resolveSurfaceSetting(viewFor(appEl));
   } finally {
     globalThis.foundry = prevFoundry;
     globalThis.ui = prevUi;
@@ -110,10 +104,6 @@ test('legacy V1 sheet resolves via data-appid + ui.windows (regression guard)', 
   const appEl = { id: 'actor-XYZ', dataset: { appid: '42' } };
   const windows = { 42: { object: { documentName: 'Actor' } } };
   assert.equal(resolveWith({ appEl, windows }), 'enableInActors');
-});
-
-test('chat composer surface maps to enableInChat', () => {
-  assert.equal(resolveWith({ appEl: null, chat: true }), 'enableInChat');
 });
 
 test('surface with no host application maps to enableElsewhere', () => {

@@ -13,12 +13,6 @@ export function resolveSurfaceSetting(view) {
   const dom = view.dom;
   if (!dom) return 'enableElsewhere';
 
-  // Chat composer detection — the chat form contains the ProseMirror editor
-  // for chat messages on both v13 and v14.
-  if (dom.closest('#chat-form, #chat-message, .chat-form')) {
-    return 'enableInChat';
-  }
-
   // Walk up to the host application element. ApplicationV2 (Journal/Item/Actor
   // sheets on v13/v14) renders its root with the `application` class; legacy V1
   // Application uses a numeric data-appid.
