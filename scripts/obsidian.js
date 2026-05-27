@@ -153,3 +153,45 @@ export function stripWikiLinks(md) {
     return inner.split('#')[0].trim();
   });
 }
+
+function renderCallout(block, head, marked, labels) {
+  const rawType = head[1].toLowerCase();
+  const canon = canonicalType(rawType);
+  const emoji = canon ? CALLOUT_EMOJI[canon] : '';
+  const injected = (labels && labels.callouts) || {};
+  const typeLabel = (canon && (injected[canon] || DEFAULT_LABELS.callouts[canon]))
+    || (rawType.charAt(0).toUpperCase() + rawType.slice(1));
+  const title = head[3].trim() || typeLabel;
+
+  const bodyMd = block.slice(1).map((l) => l.replace(/^>\s?/, '')).join('\n').trim();
+  const bodyHtml = bodyMd ? marked.parse(bodyMd).trim() : '';
+
+  const cls = canon ? `md-callout md-callout-${canon}` : 'md-callout';
+  const titleHtml = `${emoji ? `${emoji} ` : ''}${escapeHtml(title)}`;
+  const body = bodyHtml ? `\n  ${bodyHtml}` : '';
+  return `<blockquote class="${cls}">\n  <p class="md-callout-title"><strong>${titleHtml}</strong></p>${body}\n</blockquote>`;
+}
+
+/**
+ * Convert Obsidian callout blockquotes into raw-HTML blockquote blocks.
+ * Body Markdown is rendered via the injected `marked`. Ordinary blockquotes are untouched.
+ * @param {string} md
+ * @param {object} marked - the marked module (injected)
+ * @param {{ callouts?: Record<string,string> }} [labels]
+ * @returns {string}
+ */
+export function transformCallouts(md, marked, labels = {}) {
+  const lines = md.split('\n');
+  const out = [];
+  const head = /^>\s*\[!(\w+)\]([+-]?)\s*(.*)$/;
+  let i = 0;
+  while (i < lines.length) {
+    const m = lines[i].match(head);
+    if (!m) { out.push(lines[i]); i++; continue; }
+    const block = [lines[i]];
+    i++;
+    while (i < lines.length && /^>/.test(lines[i])) { block.push(lines[i]); i++; }
+    out.push(renderCallout(block, m, marked, labels));
+  }
+  return out.join('\n');
+}

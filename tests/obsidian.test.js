@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { canonicalType, CALLOUT_TYPES, extractFrontmatter, frontmatterToHtml, stripWikiLinks } from '../scripts/obsidian.js';
+import { marked } from '../vendor/marked.esm.js';
+import { canonicalType, CALLOUT_TYPES, extractFrontmatter, frontmatterToHtml, stripWikiLinks, transformCallouts } from '../scripts/obsidian.js';
 
 test('canonicalType returns canonical types unchanged (case-insensitive)', () => {
   assert.equal(canonicalType('tip'), 'tip');
@@ -114,4 +115,48 @@ test('stripWikiLinks leaves embeds alone', () => {
 
 test('stripWikiLinks does not touch @UUID tokens', () => {
   assert.equal(stripWikiLinks('@UUID[Actor.x]{Bob}'), '@UUID[Actor.x]{Bob}');
+});
+
+test('transformCallouts wraps a callout in a classed blockquote with emoji + title', () => {
+  const out = transformCallouts('> [!tip] Heads up\n> Body text', marked);
+  assert.match(out, /<blockquote class="md-callout md-callout-tip">/);
+  assert.match(out, /<p class="md-callout-title"><strong>💡 Heads up<\/strong><\/p>/);
+  assert.match(out, /Body text/);
+});
+
+test('transformCallouts resolves aliases to the canonical type', () => {
+  const out = transformCallouts('> [!summary] S', marked);
+  assert.match(out, /md-callout-abstract/);
+  assert.match(out, /📋 S/);
+});
+
+test('transformCallouts falls back to the type label when no title is given', () => {
+  const out = transformCallouts('> [!note]\n> body', marked);
+  assert.match(out, /<strong>📝 Note<\/strong>/);
+});
+
+test('transformCallouts accepts +/- fold markers', () => {
+  const out = transformCallouts('> [!info]+ Title', marked);
+  assert.match(out, /md-callout-info/);
+  assert.match(out, /ℹ️ Title/);
+});
+
+test('transformCallouts renders body Markdown', () => {
+  const out = transformCallouts('> [!note] T\n> - one\n> - two', marked);
+  assert.match(out, /<li>one<\/li>/);
+});
+
+test('transformCallouts uses a generic class for unknown types', () => {
+  const out = transformCallouts('> [!frobnicate] X', marked);
+  assert.match(out, /class="md-callout"/);
+  assert.match(out, /<strong>X<\/strong>/);
+});
+
+test('transformCallouts leaves ordinary blockquotes alone', () => {
+  assert.equal(transformCallouts('> just a quote', marked), '> just a quote');
+});
+
+test('transformCallouts uses injected callout labels', () => {
+  const out = transformCallouts('> [!note]', marked, { callouts: { note: 'Remarque' } });
+  assert.match(out, /📝 Remarque/);
 });
