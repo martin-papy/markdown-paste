@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dialog with a paste textarea; on insert, the Markdown is converted to sanitized HTML and inserted at the current selection.
 - GitHub Flavored Markdown support (tables, task lists, strikethrough, fenced code, autolinks).
 - Foundry enricher tokens (`@UUID[…]`, `[[/r …]]`, etc.) pass through unchanged.
+- Obsidian compatibility: YAML frontmatter becomes a "Properties" table, callouts (`> [!tip]`, `[!note]`, `[!quote]`, …) become styled blockquotes with emoji + title, and `[[wikilinks]]` are reduced to plain text (Foundry `[[/r …]]` rolls preserved).
+- "Process Obsidian syntax" setting (on by default).
 - Per-surface visibility settings: Journals, Items, Actors, Chat, Elsewhere.
 - "Treat single newlines as line breaks" setting (off by default).
 - English and French localizations.

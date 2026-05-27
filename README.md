@@ -8,6 +8,7 @@ System-agnostic. Works on Foundry v13 and v14.
 
 - Toolbar button in every ProseMirror editor (toggleable per surface)
 - GFM support: tables, task lists, strikethrough, fenced code, autolinks
+- Obsidian support: frontmatter → Properties table, callouts → styled blockquotes, wikilinks → plain text
 - Foundry enricher tokens pass through (`@UUID[Actor.x]{Bob}`, `[[/r 1d20]]`, etc.)
 - HTML sanitization via DOMPurify — no XSS surface
 - Inserts at the cursor (or replaces the selection) — non-destructive
@@ -37,6 +38,7 @@ Found under **Configure Settings → Module Settings → Markdown Paste**:
 - **Show in chat composer** (default: off)
 - **Show in other editors** (default: on)
 - **Treat single newlines as line breaks** (default: off — standard CommonMark)
+- **Process Obsidian syntax** (default: on)
 
 All settings are client-scope (per-user, not GM-controlled).
 
@@ -56,6 +58,10 @@ Used when validating a new release:
 - [ ] Cursor-position insertion works (not appended at end)
 - [ ] Selection replacement works
 - [ ] Closing the sheet while dialog is open produces a graceful error toast
+- [ ] Pasting an Obsidian note yields a Properties table at the top
+- [ ] Callouts render with emoji + title (colored box if the class survives, plain blockquote otherwise)
+- [ ] `[[Wiki Links]]` become plain text; `[[/r 1d20]]` stays a working roll
+- [ ] "Process Obsidian syntax" off → raw `[!type]`, `---`, and `[[…]]` pass through unprocessed
 
 ## Development
 
