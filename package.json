@@ -1,7 +1,7 @@
 {
   "name": "markdown-paste-tests",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Dev-only — node test runner config for markdown-paste",
   "type": "module",
   "scripts": {
