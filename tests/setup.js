@@ -1,3 +1,3 @@
 // tests/setup.js
-// Empty for now — Task 4 will add jsdom bootstrap if needed.
-// Kept as a `--import` target so future global setup has a home.
+// `--import` anchor for the node:test runner (see package.json "test" script).
+// jsdom is bootstrapped per-suite in the test files; add global fixtures here if needed.

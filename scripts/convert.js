@@ -18,6 +18,9 @@ export function convert(md, deps, options = {}) {
     breaks: gfmBreaks,
   });
 
+  // ADD_ATTR keeps target="_blank" / rel="noopener" on raw-HTML links authors paste.
+  // DOMPurify still blocks javascript:, data:, and vbscript: protocols unconditionally,
+  // so this does not widen the XSS surface — don't remove it during a security audit.
   return DOMPurify.sanitize(html, {
     ADD_ATTR: ['target', 'rel'],
   });
