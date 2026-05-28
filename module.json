@@ -2,7 +2,7 @@
   "id": "markdown-paste",
   "title": "Markdown Paste",
   "description": "Paste Markdown into any FoundryVTT rich-text editor. Adds a toolbar button to the ProseMirror menu that opens a paste dialog and inserts converted HTML at the cursor.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "authors": [
     {
       "name": "Martin Papy",
