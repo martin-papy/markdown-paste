@@ -117,6 +117,19 @@ test('target="_blank" links are forced to rel="noopener noreferrer"', () => {
   assert.match(html, /rel="noopener noreferrer"/);
 });
 
+test('target="_blank" matching is case-insensitive (_BLANK is hardened too)', () => {
+  const html = convert('<a href="https://example.com" target="_BLANK">x</a>', deps);
+  assert.match(html, /rel="[^"]*\bnoopener\b[^"]*"/);
+  assert.match(html, /rel="[^"]*\bnoreferrer\b[^"]*"/);
+});
+
+test('existing rel tokens are preserved when hardening target="_blank"', () => {
+  const html = convert('<a href="https://example.com" target="_blank" rel="nofollow">x</a>', deps);
+  assert.match(html, /\bnofollow\b/);
+  assert.match(html, /\bnoopener\b/);
+  assert.match(html, /\bnoreferrer\b/);
+});
+
 test('rel hardening is idempotent across repeated conversions', () => {
   convert('<a href="https://example.com" target="_blank">x</a>', deps);
   const html = convert('<a href="https://example.com" target="_blank">x</a>', deps);

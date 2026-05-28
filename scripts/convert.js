@@ -8,8 +8,13 @@ import { extractFrontmatter, frontmatterToHtml, stripWikiLinks, transformCallout
 function ensureLinkHardening(DOMPurify) {
   if (DOMPurify.__mdPasteHardened) return;
   DOMPurify.addHook('afterSanitizeAttributes', (node) => {
-    if (node.tagName === 'A' && node.getAttribute('target') === '_blank') {
-      node.setAttribute('rel', 'noopener noreferrer');
+    // HTML matches the _blank keyword ASCII case-insensitively, so normalize
+    // before comparing; otherwise target="_BLANK" slips past the hardening.
+    if (node.tagName === 'A' && node.getAttribute('target')?.toLowerCase() === '_blank') {
+      const rel = new Set((node.getAttribute('rel') || '').split(/\s+/).filter(Boolean));
+      rel.add('noopener');
+      rel.add('noreferrer');
+      node.setAttribute('rel', [...rel].join(' '));
     }
   });
   DOMPurify.__mdPasteHardened = true;
