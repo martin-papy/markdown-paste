@@ -104,6 +104,27 @@ test('javascript: hrefs are blocked', () => {
   assert.doesNotMatch(html, /href="javascript:/i);
 });
 
+test('inline style attributes are stripped (CSS-injection: beacons/clickjacking)', () => {
+  const beacon = convert('<p style="background:url(https://attacker.example/track.png)">x</p>', deps);
+  assert.doesNotMatch(beacon, /style=/i);
+  assert.doesNotMatch(beacon, /attacker\.example/i);
+  const overlay = convert('<div style="position:fixed;top:0;width:100%;height:100%">x</div>', deps);
+  assert.doesNotMatch(overlay, /style=/i);
+});
+
+test('target="_blank" links are forced to rel="noopener noreferrer"', () => {
+  const html = convert('<a href="https://example.com" target="_blank">x</a>', deps);
+  assert.match(html, /rel="noopener noreferrer"/);
+});
+
+test('rel hardening is idempotent across repeated conversions', () => {
+  convert('<a href="https://example.com" target="_blank">x</a>', deps);
+  const html = convert('<a href="https://example.com" target="_blank">x</a>', deps);
+  // exactly one rel attribute, no stacked/duplicate values from repeated hooks
+  assert.equal((html.match(/rel=/g) || []).length, 1);
+  assert.match(html, /rel="noopener noreferrer"/);
+});
+
 test('Foundry @UUID tokens pass through unchanged', () => {
   const html = convert('See @UUID[Actor.abc]{Bob} for details.', deps);
   assert.match(html, /@UUID\[Actor\.abc\]\{Bob\}/);
