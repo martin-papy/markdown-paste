@@ -1,6 +1,26 @@
 import { extractFrontmatter, frontmatterToHtml, stripWikiLinks, transformCallouts } from './obsidian.js';
 
 /**
+ * Force rel="noopener noreferrer" on every target="_blank" link to block
+ * reverse-tabnabbing. Registered once per DOMPurify instance (idempotent),
+ * so repeated convert() calls don't stack duplicate hooks.
+ */
+function ensureLinkHardening(DOMPurify) {
+  if (DOMPurify.__mdPasteHardened) return;
+  DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+    // HTML matches the _blank keyword ASCII case-insensitively, so normalize
+    // before comparing; otherwise target="_BLANK" slips past the hardening.
+    if (node.tagName === 'A' && node.getAttribute('target')?.toLowerCase() === '_blank') {
+      const rel = new Set((node.getAttribute('rel') || '').split(/\s+/).filter(Boolean));
+      rel.add('noopener');
+      rel.add('noreferrer');
+      node.setAttribute('rel', [...rel].join(' '));
+    }
+  });
+  DOMPurify.__mdPasteHardened = true;
+}
+
+/**
  * Convert a Markdown string to sanitized HTML.
  * Dependencies are injected so the function is unit-testable in Node + jsdom
  * and decoupled from how Foundry loads marked/DOMPurify at runtime.
@@ -31,10 +51,16 @@ export function convert(md, deps, options = {}) {
     breaks: gfmBreaks,
   });
 
-  // ADD_ATTR keeps target="_blank" / rel="noopener" on raw-HTML links authors paste.
-  // DOMPurify still blocks javascript:, data:, and vbscript: protocols unconditionally,
-  // so this does not widen the XSS surface — don't remove it during a security audit.
+  ensureLinkHardening(DOMPurify);
+
+  // ADD_ATTR keeps author-supplied target/rel on raw-HTML links; the hook above
+  // then forces rel="noopener noreferrer" whenever target="_blank" is present.
+  // FORBID_ATTR drops inline style to block CSS-injection — url() beacons that
+  // phone home on view, and position overlays used for clickjacking. DOMPurify
+  // still blocks javascript:, data:, and vbscript: protocols unconditionally,
+  // so this config does not widen the XSS surface — don't loosen it in an audit.
   return DOMPurify.sanitize(html, {
     ADD_ATTR: ['target', 'rel'],
+    FORBID_ATTR: ['style'],
   });
 }
