@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-05-28
+
+### Fixed
+- Strengthened link security for external links opened in new tabs with additional protective attributes
+- Improved HTML sanitization by removing inline style attributes to enhance overall security
+
 ## [0.2.0] - 2026-05-27
 
 ### Removed
