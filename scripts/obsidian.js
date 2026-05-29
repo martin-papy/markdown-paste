@@ -1,7 +1,7 @@
 // scripts/obsidian.js
 // Pure Obsidian-syntax transforms. No Foundry imports — unit-testable in Node + jsdom.
 
-const CALLOUT_EMOJI = {
+export const CALLOUT_EMOJI = {
   note: '📝', abstract: '📋', info: 'ℹ️', todo: '☑️', tip: '💡',
   success: '✅', question: '❓', warning: '⚠️', failure: '❌',
   danger: '⚡', bug: '🐛', example: '📑', quote: '💬',
@@ -143,7 +143,7 @@ ${rows}
  * @returns {string}
  */
 export function transformHighlights(md) {
-  return md.replace(/==([^=\n]+)==/g, '<mark>$1</mark>');
+  return md.replace(/==([^=\n]+)==/g, '<mark class="md-highlight">$1</mark>');
 }
 
 /**

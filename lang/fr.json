@@ -32,5 +32,15 @@
   "markdown-paste.callouts.danger": "Danger",
   "markdown-paste.callouts.bug": "Bogue",
   "markdown-paste.callouts.example": "Exemple",
-  "markdown-paste.callouts.quote": "Citation"
+  "markdown-paste.callouts.quote": "Citation",
+  "markdown-paste.settings.heading.global": "Paramètres de Markdown Paste",
+  "markdown-paste.settings.allowNonGM.name": "Autoriser les joueurs non-MJ à utiliser Coller du Markdown",
+  "markdown-paste.settings.allowNonGM.hint": "Lorsque cette option est activée, les utilisateurs non-MJ voient aussi le bouton Coller du Markdown (toujours soumis aux interrupteurs par surface individuels). Lorsqu'elle est désactivée, seuls les MJ le voient.",
+  "markdown-paste.settings.calloutColors.name": "Couleurs des encadrés et surlignages",
+  "markdown-paste.settings.calloutColors.label": "Configurer les couleurs",
+  "markdown-paste.settings.calloutColors.hint": "Personnalisez la couleur d'accentuation de chaque type d'encadré Obsidian ainsi que le fond des ==surlignages==. Les changements s'appliquent à tous les encadrés et surlignages pour tous les utilisateurs.",
+  "markdown-paste.calloutColors.title": "Couleurs des encadrés et surlignages",
+  "markdown-paste.calloutColors.highlight": "Surlignage",
+  "markdown-paste.calloutColors.reset": "Réinitialiser",
+  "markdown-paste.calloutColors.save": "Enregistrer"
 }

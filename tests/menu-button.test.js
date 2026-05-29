@@ -115,3 +115,49 @@ test('host application with an unrecognised document maps to enableElsewhere', (
   const instances = new Map([[appEl.id, { document: { documentName: 'Setting' } }]]);
   assert.equal(resolveWith({ appEl, instances }), 'enableElsewhere');
 });
+
+// --- Access gate (allowNonGM) -------------------------------------------------
+// resolveSurfaceSetting on makeMenu() returns 'enableElsewhere' (no host app).
+// A keyed game.settings.get lets each test control allowNonGM vs the surface flag.
+
+function withGame(user, getImpl, fn) {
+  const prev = globalThis.game;
+  globalThis.game = { user, settings: { get: getImpl } };
+  try { return fn(); } finally { globalThis.game = prev; }
+}
+
+test('non-GM is blocked when allowNonGM is disabled', () => {
+  withGame({ isGM: false }, (m, key) => (key === 'allowNonGM' ? false : true), () => {
+    registerMenuHook();
+    const items = [];
+    captured.getProseMirrorMenuItems(makeMenu(), items);
+    assert.equal(items.length, 0);
+  });
+});
+
+test('non-GM is allowed when allowNonGM is enabled and the surface is enabled', () => {
+  withGame({ isGM: false }, () => true, () => {
+    registerMenuHook();
+    const items = [];
+    captured.getProseMirrorMenuItems(makeMenu(), items);
+    assert.equal(items.length, 1);
+  });
+});
+
+test('non-GM allowed but surface disabled → no button (per-surface gate still applies)', () => {
+  withGame({ isGM: false }, (m, key) => (key === 'allowNonGM' ? true : false), () => {
+    registerMenuHook();
+    const items = [];
+    captured.getProseMirrorMenuItems(makeMenu(), items);
+    assert.equal(items.length, 0);
+  });
+});
+
+test('GM is allowed even when allowNonGM is disabled', () => {
+  withGame({ isGM: true }, (m, key) => (key === 'allowNonGM' ? false : true), () => {
+    registerMenuHook();
+    const items = [];
+    captured.getProseMirrorMenuItems(makeMenu(), items);
+    assert.equal(items.length, 1);
+  });
+});

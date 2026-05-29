@@ -106,11 +106,14 @@ preflight() {
   git rev-parse --verify --quiet develop >/dev/null \
     || die 2 "local 'develop' branch not found — create it with 'git checkout -b develop origin/develop'"
 
-  # module.json and CHANGELOG.md exist + parse
+  # module.json, package.json and CHANGELOG.md exist + parse
   [[ -f module.json ]]  || die 2 "module.json not found in $(pwd)"
+  [[ -f package.json ]] || die 2 "package.json not found in $(pwd)"
   [[ -f CHANGELOG.md ]] || die 2 "CHANGELOG.md not found in $(pwd)"
   jq empty module.json 2>/dev/null \
     || die 2 "module.json is not valid JSON — run 'jq . module.json' to see the parse error"
+  jq empty package.json 2>/dev/null \
+    || die 2 "package.json is not valid JSON — run 'jq . package.json' to see the parse error"
 
   log "✓ pre-flight checks passed"
 }
@@ -225,7 +228,8 @@ plan_summary() {
   log "Plan for v${TARGET}:"
   log "  • Update module.json: version ${CURRENT} → ${TARGET} (if not already)"
   log "  • Update module.json: download URL → ${download_url} (if not already)"
-  log "  • Commit + push origin main  (skipped if module.json is already up to date)"
+  log "  • Update package.json: version → ${TARGET} (if not already)"
+  log "  • Commit + push origin main  (skipped if module.json and package.json are already up to date)"
   log "  • Tag v${TARGET} at HEAD and push the tag"
   log "  • GitHub Actions release workflow will fire on the tag"
   log "  • Switch to develop, merge main, push origin develop, end on develop"
@@ -242,13 +246,15 @@ plan_summary() {
 execute_release() {
   local download_url="${DOWNLOAD_URL_BASE}/v${TARGET}/markdown-paste.zip"
 
-  # 1. Detect no-op: if module.json already has the target values, skip the edit/commit/push entirely.
-  local current_ver current_dl
+  # 1. Detect no-op: if module.json and package.json already have the target
+  #    values, skip the edit/commit/push entirely.
+  local current_ver current_dl current_pkg_ver
   current_ver=$(jq -r '.version' module.json)
   current_dl=$(jq -r '.download' module.json)
+  current_pkg_ver=$(jq -r '.version' package.json)
 
-  if [[ "$current_ver" == "$TARGET" && "$current_dl" == "$download_url" ]]; then
-    log "module.json already up to date; skipping main commit."
+  if [[ "$current_ver" == "$TARGET" && "$current_dl" == "$download_url" && "$current_pkg_ver" == "$TARGET" ]]; then
+    log "module.json and package.json already up to date; skipping main commit."
   else
     # 2. Edit module.json atomically
     jq --arg v "$TARGET" --arg dl "$download_url" \
@@ -256,10 +262,16 @@ execute_release() {
        && mv module.json.tmp module.json \
        || die 4 "module.json edit failed — no changes committed. Run 'rm -f module.json.tmp' then re-run release.sh."
 
+    # 2b. Edit package.json atomically (keep version aligned with module.json)
+    jq --arg v "$TARGET" \
+       '.version = $v' package.json > package.json.tmp \
+       && mv package.json.tmp package.json \
+       || die 4 "package.json edit failed — module.json already changed. Run 'rm -f package.json.tmp', then 'git checkout -- module.json package.json', then re-run release.sh."
+
     # 3. Commit
-    git add module.json
+    git add module.json package.json
     git commit -m "chore: release v${TARGET}" \
-      || die 4 "commit failed — inspect with 'git status' and run 'git restore --staged module.json && git checkout -- module.json' to reset."
+      || die 4 "commit failed — inspect with 'git status' and run 'git restore --staged module.json package.json && git checkout -- module.json package.json' to reset."
 
     # 4. Push main
     git push origin main \

@@ -41,6 +41,10 @@ export function resolveSurfaceSetting(view) {
 
 export function registerMenuHook() {
   Hooks.on('getProseMirrorMenuItems', (menu, items) => {
+    // Global access gate: non-GM users only see the button when the GM allows it.
+    // GMs always pass; the per-surface gate below still applies to everyone.
+    if (!game.user?.isGM && !getSetting('allowNonGM')) return;
+
     const settingKey = resolveSurfaceSetting(menu.view);
     if (!getSetting(settingKey)) return;
 

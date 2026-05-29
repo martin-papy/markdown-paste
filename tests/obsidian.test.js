@@ -193,12 +193,12 @@ test('transformCallouts keeps adjacent callouts separate without a blank line', 
   assert.match(out, /md-callout-tip/);
 });
 
-test('transformHighlights wraps ==text== in <mark>', () => {
-  assert.equal(transformHighlights('His name was ==Johnny Silverhand==.'), 'His name was <mark>Johnny Silverhand</mark>.');
+test('transformHighlights wraps ==text== in <mark class="md-highlight">', () => {
+  assert.equal(transformHighlights('His name was ==Johnny Silverhand==.'), 'His name was <mark class="md-highlight">Johnny Silverhand</mark>.');
 });
 
 test('transformHighlights handles multiple highlights on one line', () => {
-  assert.equal(transformHighlights('==foo== and ==bar=='), '<mark>foo</mark> and <mark>bar</mark>');
+  assert.equal(transformHighlights('==foo== and ==bar=='), '<mark class="md-highlight">foo</mark> and <mark class="md-highlight">bar</mark>');
 });
 
 test('transformHighlights does not span newlines', () => {
@@ -211,4 +211,13 @@ test('transformHighlights leaves ==== (empty) alone', () => {
 
 test('transformHighlights leaves plain text unchanged', () => {
   assert.equal(transformHighlights('no highlights here'), 'no highlights here');
+});
+
+test('CALLOUT_EMOJI is exported with an entry for every callout type', async () => {
+  const { CALLOUT_EMOJI, CALLOUT_TYPES } = await import('../scripts/obsidian.js');
+  assert.equal(typeof CALLOUT_EMOJI, 'object');
+  for (const type of CALLOUT_TYPES) {
+    assert.equal(typeof CALLOUT_EMOJI[type], 'string');
+    assert.ok(CALLOUT_EMOJI[type].length > 0, `missing emoji: ${type}`);
+  }
 });
