@@ -41,6 +41,9 @@ const STYLE_ID = 'markdown-paste-callout-colors';
  * @returns {string}
  */
 export function buildCalloutColorCss(colors = {}) {
+  // Coerce non-objects (e.g. null from a cleared/corrupted setting) to {} so
+  // the reads below are always safe.
+  if (colors === null || typeof colors !== 'object') colors = {};
   const decls = CALLOUT_TYPES.map((type) => {
     const raw = colors[type];
     const safe = isValidHexColor(raw) ? raw : DEFAULT_CALLOUT_COLORS[type];
