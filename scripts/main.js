@@ -1,7 +1,7 @@
 // scripts/main.js
 import { registerSettings, getSetting, MODULE_ID } from './settings.js';
 import { registerMenuHook } from './menu-button.js';
-import { registerColorMenu } from './callout-color-menu.js';
+import { registerColorMenu, openCalloutColorMenu } from './callout-color-menu.js';
 import { applyCalloutColors } from './callout-colors.js';
 
 Hooks.once('init', () => {
@@ -12,7 +12,7 @@ Hooks.once('init', () => {
   registerSettings();
   registerColorMenu();
   registerMenuHook();
-  registerSettingsHeading();
+  enhanceSettingsConfig();
 });
 
 Hooks.once('ready', () => {
@@ -21,30 +21,43 @@ Hooks.once('ready', () => {
 });
 
 /**
- * Inject a "Global Settings" heading before this module's first setting in the
- * Settings Configuration form. Best-effort and UI-only: no-op if the expected
- * markup is absent, so it never throws.
+ * Enhance the Settings Configuration form for this module: prepend a heading at
+ * the top of the module's category panel, and wire the callout-colors button to
+ * open the form directly (Foundry's native `openSubmenu` action does not open
+ * ApplicationV2 menus in some builds). Best-effort and UI-only: no-op if the
+ * expected markup is absent, so it never throws.
  */
-function registerSettingsHeading() {
+function enhanceSettingsConfig() {
   Hooks.on('renderSettingsConfig', (app, html) => {
     const root = html instanceof window.HTMLElement ? html : html?.[0];
     if (!root) return;
 
-    // Anchor on the module's first setting. Different Foundry versions expose it
-    // via a data-setting-id attribute or a form field named "<module>.<key>";
-    // try both so the heading lands regardless of the exact settings markup.
+    // Any element belonging to this module anchors us to its category panel.
+    // The registerMenu button reliably carries data-key="<module>.<menu>".
     const anchor =
-      root.querySelector(`[data-setting-id^="${MODULE_ID}."]`)
+      root.querySelector(`[data-key^="${MODULE_ID}."]`)
+      ?? root.querySelector(`[data-setting-id^="${MODULE_ID}."]`)
       ?? root.querySelector(`[name^="${MODULE_ID}."]`);
-    const group = anchor?.closest('.form-group');
-    if (!group?.parentElement) return;
+    if (!anchor) return;
 
-    // Idempotent: don't inject twice if the form re-renders.
-    if (group.previousElementSibling?.classList?.contains('markdown-paste-settings-heading')) return;
+    // Heading: prepend to the top of the module's category section.
+    const section = anchor.closest('section.tab') ?? anchor.closest('.form-group')?.parentElement;
+    if (section && !section.querySelector('.markdown-paste-settings-heading')) {
+      const heading = document.createElement('h3');
+      heading.className = 'markdown-paste-settings-heading';
+      heading.textContent = game.i18n.localize('markdown-paste.settings.heading.global');
+      section.prepend(heading);
+    }
 
-    const heading = document.createElement('h3');
-    heading.className = 'markdown-paste-settings-heading';
-    heading.textContent = game.i18n.localize('markdown-paste.settings.heading.global');
-    group.parentElement.insertBefore(heading, group);
+    // Wire the callout-colors button to open the form directly.
+    const menuBtn = root.querySelector(`[data-key="${MODULE_ID}.calloutColorsMenu"]`);
+    if (menuBtn && !menuBtn.dataset.mdpWired) {
+      menuBtn.dataset.mdpWired = '1';
+      menuBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        openCalloutColorMenu();
+      });
+    }
   });
 }

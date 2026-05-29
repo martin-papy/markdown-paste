@@ -67,6 +67,13 @@ export class CalloutColorMenu extends HandlebarsApplicationMixin(ApplicationV2) 
   }
 }
 
+/** Open the callout-color sub-form. Proven to render reliably when invoked
+ *  directly — used to wire the settings button, whose native `openSubmenu`
+ *  action does not open ApplicationV2 menus in some Foundry builds. */
+export function openCalloutColorMenu() {
+  return new CalloutColorMenu().render({ force: true });
+}
+
 /** Register the color sub-form under the module's settings (GM-only). */
 export function registerColorMenu() {
   game.settings.registerMenu(MODULE_ID, 'calloutColorsMenu', {
