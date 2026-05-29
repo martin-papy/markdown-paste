@@ -24,8 +24,15 @@ A FoundryVTT module (v13/v14) that adds a **Paste Markdown** button to every Pro
 The data flow is: **Toolbar hook → Dialog → Convert → Insert**
 
 ```
-scripts/main.js          Foundry init hook — calls registerSettings() + registerMenuHook()
-scripts/settings.js      MODULE_ID constant + 6 client-scoped boolean settings
+scripts/main.js          Foundry init hook — registerSettings() + registerColorMenu() +
+                         registerMenuHook() + a "Global Settings" heading hook; on ready,
+                         applies the callout palette to every client
+scripts/settings.js      MODULE_ID constant + 7 world-scoped boolean settings (GM-controlled)
+                         plus the non-config calloutColors object setting
+scripts/callout-colors.js   Pure: DEFAULT_CALLOUT_COLORS, isValidHexColor, buildCalloutColorCss,
+                         applyCalloutColors (injects a <style> overriding :root vars). No Foundry import.
+scripts/callout-color-menu.js  CalloutColorMenu (ApplicationV2 + Handlebars) + registerColorMenu();
+                         the 13-picker sub-form (registerMenu). Foundry-only — imported only by main.js
 scripts/menu-button.js   getProseMirrorMenuItems hook — detects surface (Journal/Item/Actor),
                          gates on setting, adds the toolbar button
 scripts/dialog.js        DialogV2.wait() — builds textarea UI, reads settings, calls convert(),
@@ -86,6 +93,7 @@ module.json
 scripts/
 styles/
 lang/
+templates/
 vendor/
 ```
 
@@ -96,7 +104,7 @@ vendor/
 If the workflow is broken or unavailable, the release can be produced by hand:
 
 ```bash
-zip -r /tmp/markdown-paste.zip module.json scripts/ styles/ lang/ vendor/
+zip -r /tmp/markdown-paste.zip module.json scripts/ styles/ lang/ templates/ vendor/
 gh release create vX.Y.Z --title "vX.Y.Z" --generate-notes /tmp/markdown-paste.zip module.json
 ```
 
