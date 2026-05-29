@@ -31,6 +31,24 @@ export function isValidHexColor(value) {
   return typeof value === 'string' && HEX_RE.test(value);
 }
 
+/**
+ * Pick a readable foreground (#000 or #fff) for a validated hex background using
+ * the WCAG relative-luminance crossover (~0.179). Keeps ==highlight== text legible
+ * on any user-chosen --md-highlight-bg, including dark backgrounds.
+ * @param {string} hex - a "#rgb" or "#rrggbb" string (assumed already validated).
+ * @returns {string} '#000' or '#fff'.
+ */
+export function highlightForeground(hex) {
+  const h = hex.slice(1);
+  const full = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
+  const channels = [0, 2, 4].map((i) => {
+    const s = parseInt(full.slice(i, i + 2), 16) / 255;
+    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+  });
+  const luminance = 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+  return luminance > 0.179 ? '#000' : '#fff';
+}
+
 const STYLE_ID = 'markdown-paste-callout-colors';
 
 /**
@@ -51,6 +69,7 @@ export function buildCalloutColorCss(colors = {}) {
   });
   const highlight = isValidHexColor(colors.highlight) ? colors.highlight : DEFAULT_HIGHLIGHT_COLOR;
   decls.push(`--md-highlight-bg:${highlight};`);
+  decls.push(`--md-highlight-fg:${highlightForeground(highlight)};`);
   return `:root{${decls.join('')}}`;
 }
 

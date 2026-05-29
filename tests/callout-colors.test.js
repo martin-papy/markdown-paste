@@ -9,6 +9,7 @@ import {
   isValidHexColor,
   buildCalloutColorCss,
   applyCalloutColors,
+  highlightForeground,
 } from '../scripts/callout-colors.js';
 
 test('DEFAULT_COLORS combines the 13 callouts plus a valid highlight color', () => {
@@ -22,6 +23,22 @@ test('buildCalloutColorCss emits --md-highlight-bg, validated with default fallb
   assert.ok(buildCalloutColorCss({}).includes(`--md-highlight-bg:${DEFAULT_HIGHLIGHT_COLOR};`));
   assert.ok(buildCalloutColorCss({ highlight: '#abcdef' }).includes('--md-highlight-bg:#abcdef;'));
   assert.ok(buildCalloutColorCss({ highlight: 'evil; }body{x' }).includes(`--md-highlight-bg:${DEFAULT_HIGHLIGHT_COLOR};`));
+});
+
+test('highlightForeground picks readable text for light and dark backgrounds', () => {
+  assert.equal(highlightForeground('#fff3a3'), '#000', 'default light highlight → black');
+  assert.equal(highlightForeground('#ffffff'), '#000');
+  assert.equal(highlightForeground('#fff'), '#000', '3-digit hex supported');
+  assert.equal(highlightForeground('#000000'), '#fff', 'dark highlight → white');
+  assert.equal(highlightForeground('#1a1a2e'), '#fff');
+  assert.equal(highlightForeground('#000'), '#fff');
+});
+
+test('buildCalloutColorCss emits a contrast-aware --md-highlight-fg', () => {
+  assert.ok(buildCalloutColorCss({ highlight: '#fff3a3' }).includes('--md-highlight-fg:#000;'));
+  assert.ok(buildCalloutColorCss({ highlight: '#000000' }).includes('--md-highlight-fg:#fff;'));
+  // Invalid highlight falls back to the default bg, so fg matches the default.
+  assert.ok(buildCalloutColorCss({ highlight: 'evil' }).includes('--md-highlight-fg:#000;'));
 });
 
 test('DEFAULT_CALLOUT_COLORS has a valid hex value for all 13 callout types', () => {
