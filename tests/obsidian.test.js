@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { marked } from '../vendor/marked.esm.js';
-import { canonicalType, CALLOUT_TYPES, extractFrontmatter, frontmatterToHtml, stripWikiLinks, transformCallouts } from '../scripts/obsidian.js';
+import { canonicalType, CALLOUT_TYPES, extractFrontmatter, frontmatterToHtml, stripWikiLinks, transformCallouts, transformHighlights } from '../scripts/obsidian.js';
 
 test('canonicalType returns canonical types unchanged (case-insensitive)', () => {
   assert.equal(canonicalType('tip'), 'tip');
@@ -191,4 +191,33 @@ test('transformCallouts keeps adjacent callouts separate without a blank line', 
   assert.equal(blocks.length, 2);
   assert.match(out, /md-callout-note/);
   assert.match(out, /md-callout-tip/);
+});
+
+test('transformHighlights wraps ==text== in <mark class="md-highlight">', () => {
+  assert.equal(transformHighlights('His name was ==Johnny Silverhand==.'), 'His name was <mark class="md-highlight">Johnny Silverhand</mark>.');
+});
+
+test('transformHighlights handles multiple highlights on one line', () => {
+  assert.equal(transformHighlights('==foo== and ==bar=='), '<mark class="md-highlight">foo</mark> and <mark class="md-highlight">bar</mark>');
+});
+
+test('transformHighlights does not span newlines', () => {
+  assert.equal(transformHighlights('==foo\nbar=='), '==foo\nbar==');
+});
+
+test('transformHighlights leaves ==== (empty) alone', () => {
+  assert.equal(transformHighlights('===='), '====');
+});
+
+test('transformHighlights leaves plain text unchanged', () => {
+  assert.equal(transformHighlights('no highlights here'), 'no highlights here');
+});
+
+test('CALLOUT_EMOJI is exported with an entry for every callout type', async () => {
+  const { CALLOUT_EMOJI, CALLOUT_TYPES } = await import('../scripts/obsidian.js');
+  assert.equal(typeof CALLOUT_EMOJI, 'object');
+  for (const type of CALLOUT_TYPES) {
+    assert.equal(typeof CALLOUT_EMOJI[type], 'string');
+    assert.ok(CALLOUT_EMOJI[type].length > 0, `missing emoji: ${type}`);
+  }
 });

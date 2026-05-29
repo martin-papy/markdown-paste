@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-05-29
+
+### Added
+- Customizable callout **and highlight** colors via a new "Configure colors" settings menu (13 callout pickers, with live preview and reset-to-defaults). Colors apply to all callouts and highlights for every user, retroactively.
+- "Allow non-GM players to use Paste Markdown" option. When off (default), only GMs see the button; the per-surface toggles still apply.
+
+### Changed
+- All module settings are now world-scoped and GM-controlled (previously per-client).
+- `==highlight==` now renders as `<mark class="md-highlight">`. Its color is themeable via the new setting.
+
 ## [0.2.1] - 2026-05-28
 
 ### Fixed

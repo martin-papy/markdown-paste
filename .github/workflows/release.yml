@@ -81,7 +81,7 @@ jobs:
       - name: Build release zip
         run: |
           set -euo pipefail
-          zip -r markdown-paste.zip module.json scripts/ styles/ lang/ vendor/
+          zip -r markdown-paste.zip module.json scripts/ styles/ lang/ templates/ vendor/
           echo "Zip contents:"
           unzip -l markdown-paste.zip
 

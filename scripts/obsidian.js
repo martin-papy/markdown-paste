@@ -1,7 +1,7 @@
 // scripts/obsidian.js
 // Pure Obsidian-syntax transforms. No Foundry imports — unit-testable in Node + jsdom.
 
-const CALLOUT_EMOJI = {
+export const CALLOUT_EMOJI = {
   note: '📝', abstract: '📋', info: 'ℹ️', todo: '☑️', tip: '💡',
   success: '✅', question: '❓', warning: '⚠️', failure: '❌',
   danger: '⚡', bug: '🐛', example: '📑', quote: '💬',
@@ -80,7 +80,7 @@ function parseYamlSubset(lines) {
     }
 
     flush();
-    const kv = line.match(/^([\w.\-]+):\s*(.*)$/);
+    const kv = line.match(/^([\w.-]+):\s*(.*)$/);
     if (!kv) { entries.push(['', line.trim()]); continue; } // malformed top-level line — preserved as raw scalar
     const key = kv[1];
     const rest = kv[2].trim();
@@ -135,6 +135,15 @@ export function frontmatterToHtml(entries, labels = {}) {
 ${rows}
   </tbody>
 </table>`;
+}
+
+/**
+ * Replace Obsidian ==highlight== syntax with <mark> elements.
+ * @param {string} md
+ * @returns {string}
+ */
+export function transformHighlights(md) {
+  return md.replace(/==([^=\n]+)==/g, '<mark class="md-highlight">$1</mark>');
 }
 
 /**

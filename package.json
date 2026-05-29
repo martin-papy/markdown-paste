@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "node --test --import ./tests/setup.js 'tests/**/*.test.js'",
+    "lint": "eslint scripts/ tests/ tools/",
     "vendor": "node tools/vendor.mjs"
   },
   "dependencies": {
@@ -13,6 +14,8 @@
     "marked": "18.0.4"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.4.0",
     "jsdom": "^25.0.0"
   }
 }
