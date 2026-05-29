@@ -1,0 +1,23 @@
+<div class="markdown-paste-callout-colors">
+  <p class="hint">{{localize "markdown-paste.settings.calloutColors.hint"}}</p>
+  <div class="mp-color-grid">
+    {{#each rows}}
+    <div class="mp-color-row">
+      <span class="mp-color-label">{{this.emoji}} {{this.label}}</span>
+      <blockquote class="md-callout md-callout-{{this.type}} mp-color-preview"
+        data-preview="{{this.type}}" style="--md-callout-color: {{this.color}}">
+        <p class="md-callout-title"><strong>{{this.emoji}} {{this.label}}</strong></p>
+      </blockquote>
+      <input type="color" name="{{this.type}}" value="{{this.color}}">
+    </div>
+    {{/each}}
+  </div>
+  <footer class="mp-color-footer">
+    <button type="button" data-action="reset">
+      <i class="fa-solid fa-rotate-left"></i> {{localize "markdown-paste.calloutColors.reset"}}
+    </button>
+    <button type="submit">
+      <i class="fa-solid fa-floppy-disk"></i> {{localize "markdown-paste.calloutColors.save"}}
+    </button>
+  </footer>
+</div>
