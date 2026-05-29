@@ -11,7 +11,11 @@ export class CalloutColorMenu extends foundry.applications.api.HandlebarsApplica
   foundry.applications.api.ApplicationV2,
 ) {
   static DEFAULT_OPTIONS = {
-    id: 'markdown-paste-callout-colors',
+    // NOTE: must differ from the injected <style id="markdown-paste-callout-colors">
+    // (see callout-colors.js). ApplicationV2._insertElement uses getElementById(id)
+    // to place the window; a shared id makes it replace the <style> in <head> and
+    // the window never reaches <body>.
+    id: 'markdown-paste-callout-color-menu',
     tag: 'form',
     window: {
       title: 'markdown-paste.calloutColors.title',
