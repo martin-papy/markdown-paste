@@ -1,7 +1,7 @@
 // scripts/obsidian.js
 // Pure Obsidian-syntax transforms. No Foundry imports — unit-testable in Node + jsdom.
 
-const CALLOUT_EMOJI = {
+export const CALLOUT_EMOJI = {
   note: '📝', abstract: '📋', info: 'ℹ️', todo: '☑️', tip: '💡',
   success: '✅', question: '❓', warning: '⚠️', failure: '❌',
   danger: '⚡', bug: '🐛', example: '📑', quote: '💬',

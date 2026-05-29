@@ -212,3 +212,12 @@ test('transformHighlights leaves ==== (empty) alone', () => {
 test('transformHighlights leaves plain text unchanged', () => {
   assert.equal(transformHighlights('no highlights here'), 'no highlights here');
 });
+
+test('CALLOUT_EMOJI is exported with an entry for every callout type', async () => {
+  const { CALLOUT_EMOJI, CALLOUT_TYPES } = await import('../scripts/obsidian.js');
+  assert.equal(typeof CALLOUT_EMOJI, 'object');
+  for (const type of CALLOUT_TYPES) {
+    assert.equal(typeof CALLOUT_EMOJI[type], 'string');
+    assert.ok(CALLOUT_EMOJI[type].length > 0, `missing emoji: ${type}`);
+  }
+});
