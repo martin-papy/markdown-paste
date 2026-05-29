@@ -138,6 +138,15 @@ ${rows}
 }
 
 /**
+ * Replace Obsidian ==highlight== syntax with <mark> elements.
+ * @param {string} md
+ * @returns {string}
+ */
+export function transformHighlights(md) {
+  return md.replace(/==([^=\n]+)==/g, '<mark>$1</mark>');
+}
+
+/**
  * Replace Obsidian wikilinks with plain text. Foundry rolls ([[/r …]], [[1d20]])
  * and embeds (![[…]]) are left untouched.
  * @param {string} md

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { marked } from '../vendor/marked.esm.js';
-import { canonicalType, CALLOUT_TYPES, extractFrontmatter, frontmatterToHtml, stripWikiLinks, transformCallouts } from '../scripts/obsidian.js';
+import { canonicalType, CALLOUT_TYPES, extractFrontmatter, frontmatterToHtml, stripWikiLinks, transformCallouts, transformHighlights } from '../scripts/obsidian.js';
 
 test('canonicalType returns canonical types unchanged (case-insensitive)', () => {
   assert.equal(canonicalType('tip'), 'tip');
@@ -191,4 +191,24 @@ test('transformCallouts keeps adjacent callouts separate without a blank line', 
   assert.equal(blocks.length, 2);
   assert.match(out, /md-callout-note/);
   assert.match(out, /md-callout-tip/);
+});
+
+test('transformHighlights wraps ==text== in <mark>', () => {
+  assert.equal(transformHighlights('His name was ==Johnny Silverhand==.'), 'His name was <mark>Johnny Silverhand</mark>.');
+});
+
+test('transformHighlights handles multiple highlights on one line', () => {
+  assert.equal(transformHighlights('==foo== and ==bar=='), '<mark>foo</mark> and <mark>bar</mark>');
+});
+
+test('transformHighlights does not span newlines', () => {
+  assert.equal(transformHighlights('==foo\nbar=='), '==foo\nbar==');
+});
+
+test('transformHighlights leaves ==== (empty) alone', () => {
+  assert.equal(transformHighlights('===='), '====');
+});
+
+test('transformHighlights leaves plain text unchanged', () => {
+  assert.equal(transformHighlights('no highlights here'), 'no highlights here');
 });
