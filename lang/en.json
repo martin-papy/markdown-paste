@@ -33,7 +33,7 @@
   "markdown-paste.callouts.bug": "Bug",
   "markdown-paste.callouts.example": "Example",
   "markdown-paste.callouts.quote": "Quote",
-  "markdown-paste.settings.heading.global": "Global Settings",
+  "markdown-paste.settings.heading.global": "Markdown Paste Settings",
   "markdown-paste.settings.allowNonGM.name": "Allow non-GM players to use Paste Markdown",
   "markdown-paste.settings.allowNonGM.hint": "When enabled, non-GM users also see the Paste Markdown button (still subject to the individual per-surface toggles). When disabled, only GMs see it.",
   "markdown-paste.settings.calloutColors.name": "Callout colors",

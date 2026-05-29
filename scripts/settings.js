@@ -4,13 +4,13 @@ import { applyCalloutColors, DEFAULT_CALLOUT_COLORS } from './callout-colors.js'
 export const MODULE_ID = 'markdown-paste';
 
 const SETTINGS = [
+  { key: 'allowNonGM',       def: false, nameKey: 'markdown-paste.settings.allowNonGM.name',        hintKey: 'markdown-paste.settings.allowNonGM.hint' },
   { key: 'enableInJournals', def: true,  nameKey: 'markdown-paste.settings.enableInJournals.name',  hintKey: 'markdown-paste.settings.enableInJournals.hint' },
   { key: 'enableInItems',    def: true,  nameKey: 'markdown-paste.settings.enableInItems.name',     hintKey: 'markdown-paste.settings.enableInItems.hint' },
   { key: 'enableInActors',   def: true,  nameKey: 'markdown-paste.settings.enableInActors.name',    hintKey: 'markdown-paste.settings.enableInActors.hint' },
   { key: 'enableElsewhere',  def: true,  nameKey: 'markdown-paste.settings.enableElsewhere.name',   hintKey: 'markdown-paste.settings.enableElsewhere.hint' },
   { key: 'gfmBreaks',        def: false, nameKey: 'markdown-paste.settings.gfmBreaks.name',         hintKey: 'markdown-paste.settings.gfmBreaks.hint' },
   { key: 'processObsidian',  def: true,  nameKey: 'markdown-paste.settings.processObsidian.name',   hintKey: 'markdown-paste.settings.processObsidian.hint' },
-  { key: 'allowNonGM',       def: false, nameKey: 'markdown-paste.settings.allowNonGM.name',        hintKey: 'markdown-paste.settings.allowNonGM.hint' },
 ];
 
 export function registerSettings() {
