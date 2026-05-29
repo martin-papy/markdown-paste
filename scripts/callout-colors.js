@@ -12,6 +12,15 @@ export const DEFAULT_CALLOUT_COLORS = Object.freeze({
   quote: '#9e9e9e',
 });
 
+/** Default background color for ==highlight== (<mark class="md-highlight">). */
+export const DEFAULT_HIGHLIGHT_COLOR = '#fff3a3';
+
+/** Combined default for the calloutColors world setting (callouts + highlight). */
+export const DEFAULT_COLORS = Object.freeze({
+  ...DEFAULT_CALLOUT_COLORS,
+  highlight: DEFAULT_HIGHLIGHT_COLOR,
+});
+
 const HEX_RE = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
 
 /**
@@ -36,8 +45,10 @@ export function buildCalloutColorCss(colors = {}) {
     const raw = colors[type];
     const safe = isValidHexColor(raw) ? raw : DEFAULT_CALLOUT_COLORS[type];
     return `--md-callout-${type}:${safe};`;
-  }).join('');
-  return `:root{${decls}}`;
+  });
+  const highlight = isValidHexColor(colors.highlight) ? colors.highlight : DEFAULT_HIGHLIGHT_COLOR;
+  decls.push(`--md-highlight-bg:${highlight};`);
+  return `:root{${decls.join('')}}`;
 }
 
 /**

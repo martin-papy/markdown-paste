@@ -5,7 +5,10 @@
 // standard `footer` PART, with per-part context built in _preparePartContext.
 import { MODULE_ID, getSetting } from './settings.js';
 import { CALLOUT_TYPES, CALLOUT_EMOJI } from './obsidian.js';
-import { DEFAULT_CALLOUT_COLORS, isValidHexColor } from './callout-colors.js';
+import { DEFAULT_COLORS, isValidHexColor } from './callout-colors.js';
+
+// All editable color keys: the 13 callout types plus the highlight (<mark>) color.
+const COLOR_KEYS = [...CALLOUT_TYPES, 'highlight'];
 
 export class CalloutColorMenu extends foundry.applications.api.HandlebarsApplicationMixin(
   foundry.applications.api.ApplicationV2,
@@ -48,12 +51,25 @@ export class CalloutColorMenu extends foundry.applications.api.HandlebarsApplica
     switch (partId) {
       case 'form': {
         const stored = getSetting('calloutColors') || {};
-        context.rows = CALLOUT_TYPES.map((type) => ({
-          type,
-          emoji: CALLOUT_EMOJI[type],
-          label: game.i18n.localize(`markdown-paste.callouts.${type}`),
-          color: isValidHexColor(stored[type]) ? stored[type] : DEFAULT_CALLOUT_COLORS[type],
-        }));
+        const colorFor = (key) => (isValidHexColor(stored[key]) ? stored[key] : DEFAULT_COLORS[key]);
+        context.rows = [
+          ...CALLOUT_TYPES.map((type) => ({
+            type,
+            isHighlight: false,
+            cssVar: '--md-callout-color',
+            emoji: CALLOUT_EMOJI[type],
+            label: game.i18n.localize(`markdown-paste.callouts.${type}`),
+            color: colorFor(type),
+          })),
+          {
+            type: 'highlight',
+            isHighlight: true,
+            cssVar: '--md-highlight-bg',
+            emoji: '🖍️',
+            label: game.i18n.localize('markdown-paste.calloutColors.highlight'),
+            color: colorFor('highlight'),
+          },
+        ];
         break;
       }
       case 'footer':
@@ -81,7 +97,7 @@ export class CalloutColorMenu extends foundry.applications.api.HandlebarsApplica
     parts.form?.querySelectorAll('input[type="color"]').forEach((input) => {
       input.addEventListener('input', (event) => {
         const preview = parts.form.querySelector(`[data-preview="${event.target.name}"]`);
-        if (preview) preview.style.setProperty('--md-callout-color', event.target.value);
+        if (preview) preview.style.setProperty(preview.dataset.cssVar || '--md-callout-color', event.target.value);
       });
     });
     return parts;
@@ -89,12 +105,12 @@ export class CalloutColorMenu extends foundry.applications.api.HandlebarsApplica
 
   /** Reset every picker to the default palette and refresh its preview. */
   static #onReset() {
-    for (const type of CALLOUT_TYPES) {
-      const input = this.element.querySelector(`input[name="${type}"]`);
+    for (const key of COLOR_KEYS) {
+      const input = this.element.querySelector(`input[name="${key}"]`);
       if (!input) continue;
-      input.value = DEFAULT_CALLOUT_COLORS[type];
-      const preview = this.element.querySelector(`[data-preview="${type}"]`);
-      if (preview) preview.style.setProperty('--md-callout-color', DEFAULT_CALLOUT_COLORS[type]);
+      input.value = DEFAULT_COLORS[key];
+      const preview = this.element.querySelector(`[data-preview="${key}"]`);
+      if (preview) preview.style.setProperty(preview.dataset.cssVar || '--md-callout-color', DEFAULT_COLORS[key]);
     }
   }
 
@@ -102,8 +118,8 @@ export class CalloutColorMenu extends foundry.applications.api.HandlebarsApplica
   static async #onSubmit(event, form, formData) {
     const data = foundry.utils.expandObject(formData.object);
     const colors = {};
-    for (const type of CALLOUT_TYPES) {
-      colors[type] = isValidHexColor(data[type]) ? data[type] : DEFAULT_CALLOUT_COLORS[type];
+    for (const key of COLOR_KEYS) {
+      colors[key] = isValidHexColor(data[key]) ? data[key] : DEFAULT_COLORS[key];
     }
     await game.settings.set(MODULE_ID, 'calloutColors', colors);
   }

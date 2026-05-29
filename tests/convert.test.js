@@ -208,7 +208,7 @@ test('convert handles the Obsidian reference fixture end-to-end', () => {
 
 test('convert renders ==highlight== as <mark> and survives DOMPurify', () => {
   const html = convert('His name was ==Johnny Silverhand==.', deps);
-  assert.match(html, /<mark>Johnny Silverhand<\/mark>/);
+  assert.match(html, /<mark class="md-highlight">Johnny Silverhand<\/mark>/);
 });
 
 test('convert leaves ==highlight== raw when obsidian:false', () => {

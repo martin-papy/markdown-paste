@@ -1,5 +1,5 @@
 // scripts/settings.js
-import { applyCalloutColors, DEFAULT_CALLOUT_COLORS } from './callout-colors.js';
+import { applyCalloutColors, DEFAULT_COLORS } from './callout-colors.js';
 
 export const MODULE_ID = 'markdown-paste';
 
@@ -31,7 +31,7 @@ export function registerSettings() {
     scope: 'world',
     config: false,
     type: Object,
-    default: DEFAULT_CALLOUT_COLORS,
+    default: DEFAULT_COLORS,
     onChange: (value) => applyCalloutColors(value),
   });
 }

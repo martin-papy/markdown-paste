@@ -4,10 +4,25 @@ import { JSDOM } from 'jsdom';
 import { CALLOUT_TYPES } from '../scripts/obsidian.js';
 import {
   DEFAULT_CALLOUT_COLORS,
+  DEFAULT_HIGHLIGHT_COLOR,
+  DEFAULT_COLORS,
   isValidHexColor,
   buildCalloutColorCss,
   applyCalloutColors,
 } from '../scripts/callout-colors.js';
+
+test('DEFAULT_COLORS combines the 13 callouts plus a valid highlight color', () => {
+  assert.equal(Object.keys(DEFAULT_COLORS).length, 14);
+  assert.ok(isValidHexColor(DEFAULT_HIGHLIGHT_COLOR));
+  assert.equal(DEFAULT_COLORS.highlight, DEFAULT_HIGHLIGHT_COLOR);
+});
+
+test('buildCalloutColorCss emits --md-highlight-bg, validated with default fallback', () => {
+  assert.ok(buildCalloutColorCss(DEFAULT_COLORS).includes(`--md-highlight-bg:${DEFAULT_HIGHLIGHT_COLOR};`));
+  assert.ok(buildCalloutColorCss({}).includes(`--md-highlight-bg:${DEFAULT_HIGHLIGHT_COLOR};`));
+  assert.ok(buildCalloutColorCss({ highlight: '#abcdef' }).includes('--md-highlight-bg:#abcdef;'));
+  assert.ok(buildCalloutColorCss({ highlight: 'evil; }body{x' }).includes(`--md-highlight-bg:${DEFAULT_HIGHLIGHT_COLOR};`));
+});
 
 test('DEFAULT_CALLOUT_COLORS has a valid hex value for all 13 callout types', () => {
   assert.equal(Object.keys(DEFAULT_CALLOUT_COLORS).length, 13);

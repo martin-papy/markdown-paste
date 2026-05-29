@@ -143,7 +143,7 @@ ${rows}
  * @returns {string}
  */
 export function transformHighlights(md) {
-  return md.replace(/==([^=\n]+)==/g, '<mark>$1</mark>');
+  return md.replace(/==([^=\n]+)==/g, '<mark class="md-highlight">$1</mark>');
 }
 
 /**

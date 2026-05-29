@@ -4,10 +4,15 @@
     {{#each rows}}
     <div class="mp-color-row">
       <span class="mp-color-label">{{this.emoji}} {{this.label}}</span>
+      {{#if this.isHighlight}}
+      <mark class="md-highlight mp-color-preview" data-preview="{{this.type}}" data-css-var="{{this.cssVar}}"
+        style="{{this.cssVar}}: {{this.color}}">{{this.label}}</mark>
+      {{else}}
       <blockquote class="md-callout md-callout-{{this.type}} mp-color-preview"
-        data-preview="{{this.type}}" style="--md-callout-color: {{this.color}}">
+        data-preview="{{this.type}}" data-css-var="{{this.cssVar}}" style="{{this.cssVar}}: {{this.color}}">
         <p class="md-callout-title"><strong>{{this.emoji}} {{this.label}}</strong></p>
       </blockquote>
+      {{/if}}
       <input type="color" name="{{this.type}}" value="{{this.color}}">
     </div>
     {{/each}}
