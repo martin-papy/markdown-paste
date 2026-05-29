@@ -35,7 +35,7 @@
   "markdown-paste.callouts.quote": "Quote",
   "markdown-paste.settings.heading.global": "Global Settings",
   "markdown-paste.settings.allowNonGM.name": "Allow non-GM players to use Paste Markdown",
-  "markdown-paste.settings.allowNonGM.hint": "When enabled, non-GM users also see the Paste Markdown button (still subject to the per-surface toggles above). When disabled, only GMs see it.",
+  "markdown-paste.settings.allowNonGM.hint": "When enabled, non-GM users also see the Paste Markdown button (still subject to the individual per-surface toggles). When disabled, only GMs see it.",
   "markdown-paste.settings.calloutColors.name": "Callout colors",
   "markdown-paste.settings.calloutColors.label": "Configure callout colors",
   "markdown-paste.settings.calloutColors.hint": "Customize the accent color of each Obsidian callout type. Changes apply to all callouts for every user.",
