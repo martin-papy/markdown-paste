@@ -110,9 +110,11 @@ No Foundry imports — unit-testable in Node + jsdom.
 
 #### New Foundry module: `scripts/callout-color-menu.js`
 
-`CalloutColorMenu`, an `ApplicationV2` form, built with **inline HTML** (the same
-approach as `dialog.js` — no new `templates/` directory, so the release zip
-contents are unchanged). Contents:
+`CalloutColorMenu`, an `ApplicationV2` form using `HandlebarsApplicationMixin`
+with a dedicated template `templates/callout-color-menu.hbs` (the idiomatic
+Foundry sub-form approach). The template is loaded at runtime (no `module.json`
+manifest entry required); the new `templates/` directory is added to the release
+zip — see Packaging. Contents:
 
 - A row per callout type (in `CALLOUT_TYPES` order): emoji + localized label
   (reuse `markdown-paste.callouts.<type>`), a **live preview** mini-callout
@@ -149,13 +151,23 @@ overridden by the injected style.
 | File | Change |
 |------|--------|
 | `scripts/callout-colors.js` | **NEW** — pure: defaults, hex validation, CSS builder, style injector |
-| `scripts/callout-color-menu.js` | **NEW** — `CalloutColorMenu` ApplicationV2 form (inline HTML) |
+| `scripts/callout-color-menu.js` | **NEW** — `CalloutColorMenu` ApplicationV2 + HandlebarsApplicationMixin form |
+| `templates/callout-color-menu.hbs` | **NEW** — Handlebars template for the color sub-form |
 | `scripts/settings.js` | world scope; add `allowNonGM`; register `calloutColors` + `registerMenu` + `onChange` |
 | `scripts/menu-button.js` | add non-GM access gate |
 | `scripts/main.js` | `renderSettingsConfig` heading hook; apply colors on `ready` |
 | `styles/markdown-paste.css` | keep `:root` defaults; add heading + color-form styles |
 | `lang/en.json`, `lang/fr.json` | new keys (heading, allowNonGM, calloutColors menu, reset) |
+| `.github/workflows/release.yml` | add `templates/` to the `zip -r markdown-paste.zip …` line (release.yml:84) |
+| `CLAUDE.md` | add `templates/` to the documented zip-contents list |
 | `CHANGELOG.md` | new entry incl. scope-migration note |
+
+### Packaging
+
+The release zip is built at `.github/workflows/release.yml:84`:
+`zip -r markdown-paste.zip module.json scripts/ styles/ lang/ vendor/`. Add
+`templates/` so the new `.hbs` ships. Mirror this in `CLAUDE.md`'s "Zip contents"
+list. No `module.json` change is needed — the template is loaded at runtime.
 
 ### New i18n keys
 
