@@ -41,14 +41,7 @@ https://github.com/martin-papy/markdown-paste/releases/latest/download/module.js
 
 Found under **Configure Settings → Module Settings → Markdown Paste**:
 
-- **Show in Journal Entry editors** (default: on)
-- **Show in Item sheet editors** (default: on)
-- **Show in Actor sheet editors** (default: on)
-- **Show in other editors** (default: on)
-- **Treat single newlines as line breaks** (default: off — standard CommonMark)
-- **Process Obsidian syntax** (default: on)
-
-All settings are client-scope (per-user, not GM-controlled).
+All settings are world-scope.
 
 ![Module Settings](images/Settings.png)
 
