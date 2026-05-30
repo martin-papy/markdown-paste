@@ -25,3 +25,4 @@ dist/
 .worktrees/
 .superpowers/
 temp/
+markdown-paste.code-workspace
