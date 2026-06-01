@@ -120,7 +120,7 @@ If installed and available, use `codebase-memory-mcp` tools **first** for any st
 - `get_architecture(aspects)` — understand project structure
 - `search_code(pattern)` — graph-augmented text search
 
-If the project is not yet indexed, run `index_repository` first. Fall back to `Grep`/`Glob`/`Read` only for config values, non-code files, or plain text content.
+If the project is not yet indexed, run `index_repository` first using the mode `full`. Fall back to `Grep`/`Glob`/`Read` only for config values, non-code files, or plain text content.
 
 ## External Documentation
 

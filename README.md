@@ -72,6 +72,10 @@ CI fails if `vendor/` is out of sync with the pinned versions. A weekly
 `update-deps` workflow bumps the libraries to latest, regenerates `vendor/`, runs
 the tests, and opens a pull request automatically.
 
+## AI Usage Disclaimer
+
+This module has been developped with the help of an AI Coding assistant (Claude Code). The code has been thoroughly reviewed and tested by a human (me).
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
