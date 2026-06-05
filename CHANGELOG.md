@@ -4,9 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.3.] - 2026-06-05
+
 ### Fixed
-- Pasting a table followed by a paragraph no longer throws a parse error. Foundry treats tables as isolating blocks, which crashed ProseMirror's slice fitter; insertion now falls back to inserting fully-closed content when that happens. (#16)
-- A note or sentence placed directly under a table (no blank line) is no longer swallowed as a stray table row when "Process Obsidian syntax" is on — it now renders as its own paragraph, matching Obsidian and Typora. (#16)
+- Pasting a table followed by a paragraph no longer throws a parse error. (#16)
+- A note or sentence placed directly under a table (no blank line) is no longer swallowed as a stray table row when "Process Obsidian syntax" is on. (#16)
 
 ## [0.3.0] - 2026-05-29
 
