@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [0.3.] - 2026-06-05
+## [0.3.1] - 2026-06-05
 
 ### Fixed
 - Pasting a table followed by a paragraph no longer throws a parse error. (#16)
