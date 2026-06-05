@@ -167,6 +167,51 @@ export function stripWikiLinks(md) {
   });
 }
 
+// A GFM table delimiter row: pipe-separated cells of hyphens with optional
+// alignment colons (e.g. `| --- | :-: |`, `|---|`, `:--`).
+const TABLE_DELIMITER = /^\s*\|?\s*:?-+:?\s*(?:\|\s*:?-+:?\s*)*\|?\s*$/;
+
+/**
+ * Terminate a Markdown table that is glued directly to following prose.
+ *
+ * GFM (and `marked`) absorb a pipe-less line immediately after table rows as a
+ * trailing single-cell row, whereas Obsidian and Typora end the table there.
+ * To match the source app, insert a blank line between a table's last row and a
+ * following non-blank, pipe-less line so it parses as its own block. See issue #16.
+ *
+ * @param {string} md
+ * @returns {string}
+ */
+export function isolateTables(md) {
+  const lines = md.replace(/\r\n/g, '\n').split('\n');
+  const out = [];
+  let i = 0;
+  while (i < lines.length) {
+    const header = lines[i];
+    const delimiter = lines[i + 1];
+    const isTableStart = header.includes('|')
+      && delimiter !== undefined
+      && delimiter.includes('-')
+      && TABLE_DELIMITER.test(delimiter);
+
+    if (!isTableStart) { out.push(header); i++; continue; }
+
+    out.push(header, delimiter);
+    i += 2;
+    // Body rows: contiguous non-blank lines that still carry a pipe.
+    while (i < lines.length && lines[i].trim() !== '' && lines[i].includes('|')) {
+      out.push(lines[i]);
+      i++;
+    }
+    // A non-blank, pipe-less line here would be swallowed as a single-cell row;
+    // a blank line keeps it a separate block.
+    if (i < lines.length && lines[i].trim() !== '' && !lines[i].includes('|')) {
+      out.push('');
+    }
+  }
+  return out.join('\n');
+}
+
 function renderCallout(block, head, marked, labels) {
   const rawType = head[1].toLowerCase();
   const canon = canonicalType(rawType);

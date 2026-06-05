@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { marked } from '../vendor/marked.esm.js';
-import { canonicalType, CALLOUT_TYPES, extractFrontmatter, frontmatterToHtml, stripWikiLinks, transformCallouts, transformHighlights } from '../scripts/obsidian.js';
+import { canonicalType, CALLOUT_TYPES, extractFrontmatter, frontmatterToHtml, isolateTables, stripWikiLinks, transformCallouts, transformHighlights } from '../scripts/obsidian.js';
 
 test('canonicalType returns canonical types unchanged (case-insensitive)', () => {
   assert.equal(canonicalType('tip'), 'tip');
@@ -17,6 +17,40 @@ test('canonicalType resolves aliases to canonical', () => {
 
 test('canonicalType returns null for unknown types', () => {
   assert.equal(canonicalType('frobnicate'), null);
+});
+
+// --- isolateTables: terminate a table that is glued to following text -------
+// GFM (and marked) absorb a pipe-less line directly after table rows as a
+// single-cell row; Obsidian/Typora end the table there. issue #16.
+
+test('isolateTables inserts a blank line between a table and a glued text line', () => {
+  const md = '| a | b |\n| - | - |\n| 1 | 2 |\n*note text.*';
+  assert.equal(isolateTables(md), '| a | b |\n| - | - |\n| 1 | 2 |\n\n*note text.*');
+});
+
+test('isolateTables leaves a table already separated by a blank line unchanged', () => {
+  const md = '| a | b |\n| - | - |\n| 1 | 2 |\n\nAfter.';
+  assert.equal(isolateTables(md), md);
+});
+
+test('isolateTables keeps following pipe rows as part of the table', () => {
+  const md = '| a | b |\n| - | - |\n| 1 | 2 |\n| 3 | 4 |';
+  assert.equal(isolateTables(md), md);
+});
+
+test('isolateTables leaves prose without a table unchanged', () => {
+  const md = 'Just a paragraph.\nAnother line.';
+  assert.equal(isolateTables(md), md);
+});
+
+test('isolateTables handles a table at end of input without a trailing line', () => {
+  const md = '| a | b |\n| - | - |\n| 1 | 2 |';
+  assert.equal(isolateTables(md), md);
+});
+
+test('isolateTables does not treat a pipe-less header candidate as a table', () => {
+  const md = 'no pipes here\n- - -\nstill prose';
+  assert.equal(isolateTables(md), md);
 });
 
 test('CALLOUT_TYPES lists the 13 canonical types', () => {

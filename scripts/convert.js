@@ -1,4 +1,4 @@
-import { extractFrontmatter, frontmatterToHtml, stripWikiLinks, transformCallouts, transformHighlights } from './obsidian.js';
+import { extractFrontmatter, frontmatterToHtml, isolateTables, stripWikiLinks, transformCallouts, transformHighlights } from './obsidian.js';
 
 /**
  * Force rel="noopener noreferrer" on every target="_blank" link to block
@@ -42,6 +42,7 @@ export function convert(md, deps, options = {}) {
   if (obsidian) {
     const { frontmatter, body } = extractFrontmatter(source);
     let processed = stripWikiLinks(body);
+    processed = isolateTables(processed);
     processed = transformHighlights(processed);
     processed = transformCallouts(processed, marked, labels);
     source = (frontmatter ? `${frontmatterToHtml(frontmatter, labels)}\n\n` : '') + processed;
