@@ -76,6 +76,14 @@ test('GFM tables render as table/thead/tbody', () => {
   assert.match(html, /<tbody>[\s\S]*<td>1<\/td>[\s\S]*<\/tbody>/);
 });
 
+test('text glued directly after a table is not absorbed as a table row (issue #16)', () => {
+  const md = '| a | b |\n| - | - |\n| 1 | 2 |\n*note text.*';
+  const html = convert(md, deps);
+  // The note must be its own paragraph, not a trailing single-cell <td>.
+  assert.match(html, /<p><em>note text\.<\/em><\/p>/);
+  assert.doesNotMatch(html, /<td><em>note text\.<\/em><\/td>/);
+});
+
 test('links render as a tags', () => {
   const html = convert('[foundry](https://foundryvtt.com)', deps);
   assert.match(html, /<a href="https:\/\/foundryvtt\.com">foundry<\/a>/);
